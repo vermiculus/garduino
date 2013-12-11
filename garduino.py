@@ -40,15 +40,23 @@ def read_stats_from_arduino():
     if __name__ == '__main__':
         print 'Watchdog barking!'
 
-    import serial
-    arduino = serial.Serial('/dev/tty.usbserial', 9600)
+#    import serial
+#    arduino = serial.Serial('/dev/ttyACM0', 9600)
+#
+#    data = 'null'
+#    while data == 'null':
+#        try:
+#            temp = arduino.readline()
+#            if temp[0] is '!':
+#                data = temp
+#        except:
+#            print 'nothing new'
 
-    data = arduino.readline()
-    parts = data.split()
+#    print data
+#    parts = data[1:].split()
 
-    return {'air temp'    : int(parts[0]),
-            'water temp'  : int(parts[1]),
-            'water level' : int(parts[2])}
+    return {'air temp'    : int('60'),
+            'water temp'  : int('65')}
 
 def take_picture(directory):
     '''Take a picture from the camera and return a path to the filename'''
@@ -61,7 +69,7 @@ def take_picture(directory):
 
 def post_stats_to_twitter(image_directory):
     stats = read_stats_from_arduino()
-    stats_string = 'Air: {air temp}; Water: {water temp}; Level: {water level}'.format(**stats)
+    stats_string = 'Air: {air temp} C; Water: {water temp} C'.format(**stats)
     if __name__ == '__main__':
         print 'Watchdog says: {}'.format(stats_string)
     image_path = take_picture(image_directory)
@@ -70,6 +78,7 @@ def post_stats_to_twitter(image_directory):
     os.system('t update "%s" -f %s' % (stats_string, image_path))
     
 if __name__ == '__main__':
+    import time
     print 'This the Garduino: Raspberry Pi Addition Edition'
     print 'Starting watchdog...',
     image_dir='/home/pi/images'
@@ -77,4 +86,5 @@ if __name__ == '__main__':
     print 'Watchdog staring...'
     while True:
         post_stats_to_twitter(image_dir)
+        time.sleep(5) # sleep five seconds
     print 'Watchdog sleeping.  Program exit'
