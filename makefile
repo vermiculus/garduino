@@ -3,3 +3,5 @@ install:
 	chmod +x garduino.py
 clean:
 	echo "The Watchdog is very cleanly!"
+autostart:
+	echo "~/garduino.py" >> ~/.bashrc
