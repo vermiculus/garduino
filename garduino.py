@@ -40,6 +40,11 @@ def read_stats_from_arduino():
     if __name__ == '__main__':
         print 'Watchdog barking!'
 
+    import serial
+    arduino = serial.Serial('/dev/tty.usbserial', 9600)
+
+    data = arduino.readline()
+
     return {'air temp'    : 70,
             'water temp'  : 60,
             'water level' : 2.3}
