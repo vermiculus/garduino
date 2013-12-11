@@ -69,5 +69,6 @@ if __name__ == '__main__':
     image_dir='/home/pi/images'
     print 'Done!'
     print 'Watchdog staring...'
-    post_stats_to_twitter(image_dir)
+    while True:
+        post_stats_to_twitter(image_dir)
     print 'Watchdog sleeping.  Program exit'
