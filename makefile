@@ -3,4 +3,3 @@ install:
 	chmod +x garduino.py
 clean:
 	echo "The Watchdog is very cleanly!"
-	
