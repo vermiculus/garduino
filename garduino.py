@@ -44,10 +44,11 @@ def read_stats_from_arduino():
     arduino = serial.Serial('/dev/tty.usbserial', 9600)
 
     data = arduino.readline()
+    parts = data.split()
 
-    return {'air temp'    : 70,
-            'water temp'  : 60,
-            'water level' : 2.3}
+    return {'air temp'    : int(parts[0]),
+            'water temp'  : int(parts[1]),
+            'water level' : int(parts[2])}
 
 def take_picture(directory):
     '''Take a picture from the camera and return a path to the filename'''
