@@ -64,7 +64,7 @@ def take_picture(directory):
 
     image_path = '{}/image{}.jpg'.format(directory, new_index)
 
-    os.system('raspistill -o {}'.format(image_path))
+    os.system('raspistill -t 0 -o {}'.format(image_path))
     return image_path
 
 def post_stats_to_twitter(image_directory):
