@@ -52,13 +52,17 @@ def read_stats_from_arduino():
         except:
             print 'nothing new'
         finally:
-            arduino.close()
+            try:
+                arduino.close()
+            except:
+                print 'Did you plug in the Arduino?'
+                data = '!50 60'
 
     print data
     parts = data[1:].split()
 
-    return {'air temp'    : int(data[0]),
-            'water temp'  : int(data[1])}
+    return {'air temp'    : int(parts[0]),
+            'water temp'  : int(parts[1])}
 
 def take_picture(directory):
     '''Take a picture from the camera and return a path to the filename'''
