@@ -40,23 +40,25 @@ def read_stats_from_arduino():
     if __name__ == '__main__':
         print 'Watchdog barking!'
 
-#    import serial
-#    arduino = serial.Serial('/dev/ttyACM0', 9600)
-#
-#    data = 'null'
-#    while data == 'null':
-#        try:
-#            temp = arduino.readline()
-#            if temp[0] is '!':
-#                data = temp
-#        except:
-#            print 'nothing new'
+    import serial
 
-#    print data
-#    parts = data[1:].split()
+    data = 'null'
+    while data == 'null':
+        try:
+            arduino = serial.Serial('/dev/ttyACM0', 9600)
+            temp = arduino.readline()
+            if temp[0] is '!':
+                data = temp
+        except:
+            print 'nothing new'
+        finally:
+            arduino.close()
 
-    return {'air temp'    : int('60'),
-            'water temp'  : int('65')}
+    print data
+    parts = data[1:].split()
+
+    return {'air temp'    : int(data[0]),
+            'water temp'  : int(data[1])}
 
 def take_picture(directory):
     '''Take a picture from the camera and return a path to the filename'''
@@ -84,7 +86,8 @@ if __name__ == '__main__':
     image_dir='/home/pi/images'
     print 'Done!'
     print 'Watchdog staring...'
-    while True:
-        post_stats_to_twitter(image_dir)
-        time.sleep(5) # sleep five seconds
+#    while True:
+    post_stats_to_twitter(image_dir)
+    print 'Watchdog is proud!'
+    time.sleep(5) # sleep five seconds
     print 'Watchdog sleeping.  Program exit'
