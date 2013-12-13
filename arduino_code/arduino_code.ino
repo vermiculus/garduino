@@ -33,31 +33,12 @@ float get_water_temperature ( void );
 void  update_time           ( Time *);
 void  print_time            ( Time *);
 
-typedef struct SIMPLE_TIME {
-  unsigned int hour;
-  unsigned int minute;
-  unsigned int second;
-  unsigned int millisecond;
-} Time;
+typedef struct SIMPLE_TIME Time;
+typedef enum   STATE       State;
 
 Time current_time;
 
-void update_time(Time *time) {
-  unsigned long m = millis();
-  time->hour = m / 1000*60*60;
-  m = m % 1000*60*60;
-  time->minute = m / 1000*60;
-  m = m % 1000*60;
-  time->second = m / 1000;
-  m = m % 1000;
-  time->millisecond = m;
-}
-void print_time(Time *time) {
-  Serial.print(time->hour); Serial.print(':');
-  Serial.print(time->minute); Serial.print(':');
-  Serial.print(time->second); Serial.print(':');
-  Serial.print(time->millisecond);
-}
+
 
 void setup() {
   Serial1.begin(38400);
@@ -806,6 +787,17 @@ struct SIMPLE_TIME {
   unsigned int minute;
   unsigned int second;
   unsigned int millisecond;
+};
+
+enum STATE {
+  _0000_0300_,
+  _0300_0600_,
+  _0600_0900_,
+  _0900_1200_,
+  _1200_1500_,
+  _1500_1800_,
+  _1800_2100_,
+  _2100_2400_
 };
 
 void update_time(Time *time) {
