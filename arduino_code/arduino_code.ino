@@ -1,3 +1,4 @@
+-*- mode: c -*-
 /* include the library code: */
 #include <LiquidCrystal.h>      /* http://www.fibidi.com/?p=734 */
 #include <OneWire.h>            /* DS18S20 Temperature */
