@@ -993,6 +993,132 @@ void lcd_display_welcome() {
   lcd_display_message(':', "James:Sappington");
 }
 
+/* Sensor Data Retrieval */
+
+/* Calculates and returns the water temperature as a float. */
+float get_temperature ( OneWire sensor ) {
+  Serial1.begin (38400);
+  float temperature;
+  byte data[12];
+  byte addr[8];
+  if (!sensor.search(addr)) {
+    /* no more sensors on chain, reset search */
+    sensor.reset_search();
+    temperature = -1000;
+  }
+  if (OneWire::crc8(addr, 7) != addr[7]) {
+    Serial.println("CRC is not valid!\n");
+    temperature = -1000;
+  }
+  if (addr[0] != 0x10 && addr[0] != 0x28) {
+    Serial.print("Device is not recognized.\n");
+    temperature = -1000;
+  }
+  if (sensor == air) {
+    sensor.write(0x44, 1); /// TODO: Why?
+  }
+  sensor.reset();
+  sensor.select(addr);
+  /* start conversion, with parasite power on at the end */
+  sensor.write(0x44, 1);
+  byte present = sensor.reset();
+  sensor.select(addr);
+  /* Read Scratchpad */
+  sensor.write(0xBE);
+  /* we need 9 bytes */
+  for (int i = 0; i < 9; i++) {
+    data[i] = sensor.read();
+  }
+  sensor.reset_search();
+  byte MSB = data[1];
+  byte LSB = data[0];
+  /* using two's complement */
+  float tempRead = ((MSB << 8)| LSB);
+  temperature = tempRead / 16;
+  /* getWaterTemp(); */
+  return temperature;
+}
+
+/* Utility Functions */
+
+char *get_spaces(int n) {
+  return malloc(n*sizeof(char))
+}
+
+long get_seconds(int h, int m, int s) {
+  return (h*60+m)*60+s;
+}
+
+long get_milliseconds(int h, int m, int s, int ms) {
+  return get_seconds(h, m, s) * 1000 + ms;
+}
+
+/*
+  Format a floating point value with number of decimal places.  The
+  `precision` parameter is a number from 0 to 6 indicating the desired
+  decimal places.  The `buf` parameter points to a buffer to receive
+  the formatted string.  This must be sufficiently large to contain
+  the resulting string.  The buffer's length may be optionally
+  specified.  If it is given, the maximum length of the generated
+  string will be one less than the specified value.
+  
+  example:
+
+      fmtDouble(3.1415, 2, buf);
+
+  will have `buf` be '3.14'.
+*/
+void fmtDouble(double val, byte precision, char *buf, unsigned bufLen) {
+  if (!buf || !bufLen) {
+    return;
+  }
+  
+  /* limit the precision to the maximum allowed value */
+  const byte maxPrecision = 6;
+  if (precision > maxPrecision) {
+    precision = maxPrecision;
+  }
+
+  if (--bufLen > 0) {
+    /* check for a negative value */
+    if (val < 0.0) {
+      val = -val;
+      *buf = '-';
+      bufLen--;
+    }
+
+    /* compute the rounding factor and fractional multiplier */
+    double roundingFactor = 0.5;
+    unsigned long mult = 1;
+    for (byte i = 0; i < precision; i++) {
+      roundingFactor /= 10.0;
+      mult *= 10;
+    }
+
+    if (bufLen > 0) {
+      /* apply the rounding factor */
+      val += roundingFactor;
+
+      /* add the integral portion to the buffer */
+      unsigned len = fmtUnsigned((unsigned long)val, buf, bufLen);
+      buf += len;
+      bufLen -= len;
+    }
+
+    /* handle the fractional portion */
+    if ((precision > 0) && (bufLen > 0)) {
+      *buf++ = '.';
+      if (--bufLen > 0) {
+        buf += fmtUnsigned((unsigned long)((val - (unsigned long)val) * mult), buf, bufLen, precision);
+      }
+    }
+  }
+
+  /* null-terminate the string */
+  *buf = '\0';
+}
+
+
 /* Local Variables: */
 /* indent-tabs-mode: nil */
 /* End: */
