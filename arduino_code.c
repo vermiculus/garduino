@@ -224,18 +224,18 @@ void sixToNineAM(){
   Serial.println("  /* ---(06:00 hours - pump 2 minutes: 120,000ms, Lights ON, Camera takes picture. )---\n");
   getWaterTemp();
   getAirTemp();
-/* set the Relay ON */
+  /* set the Relay ON */
   digitalWrite(PIN_PUMP_RELAY_1, RELAY_ON);
-/* pump 2 minutes */
+  /* pump 2 minutes */
   LCDTimePump();
-/* set the Relay ON */
+  /* set the Relay ON */
   digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
   Serial.println("06:02");
   getWaterTemp();
   getAirTemp();
-/* set the Relay On */
+  /* set the Relay On */
   digitalWrite(LightRelay_2, RELAY_ON);
-/* delay(10798000); */
+  /* delay(10798000); */
 /* delay ~3 hours */
   LCDTimeLightsON();
 }
@@ -264,24 +264,22 @@ void nineToNoon(){
   Serial.println("---(09:00 - pump 2 minutes: 120,000ms, Lights ON)---\n");
   getWaterTemp();
   getAirTemp();
-/* light off */
+  /* light off */
   digitalWrite(LightRelay_2, RELAY_OFF);
-/* set the Relay ON */
+  /* set the Relay ON */
   digitalWrite(PIN_PUMP_RELAY_1, RELAY_ON);
-/* pump 2 minutes */
+  /* pump 2 minutes */
   LCDTimePump();
-/* set the Relay ON */
+  /* set the Relay ON */
   digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
   Serial.println("09:02");
   getWaterTemp();
   getAirTemp();
-/* set the Relay On */
+  /* set the Relay On */
   digitalWrite(LightRelay_2, RELAY_ON);
-/*
- */
-/* delay(10798000);  lights on for 3 hours */
-/* delay ~3 hours */
-     LCDTimeLightsON();
+  /* delay(10798000);  lights on for 3 hours */
+  /* delay ~3 hours */
+  LCDTimeLightsON();
 }
 
 void LCDnineToNoon(){
@@ -377,24 +375,22 @@ void threeToSixPM(){
   getWaterTemp();
   getAirTemp();
   LCDthreeToSix();
-/* light off at 15:00 for 2 minutes while pump runs */
+  /* light off at 15:00 for 2 minutes while pump runs */
   digitalWrite(LightRelay_2, RELAY_OFF);
-/* set the Relay ON */
+  /* set the Relay ON */
   digitalWrite(PIN_PUMP_RELAY_1, RELAY_ON);
-/* pump 2 minutes */
+  /* pump 2 minutes */
   LCDTimePump();
-/* set the Relay ON */
+  /* set the Relay ON */
   digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
   Serial.println("15:02\n");
-/* set the Relay On */
+  /* set the Relay On */
   digitalWrite(LightRelay_2, RELAY_ON);
   getWaterTemp();
   getAirTemp();
-/*
- */
-/* lay(10798000);  lights on for 3 hours */
-/* delay ~3 hours */
-     LCDTimeLightsON();
+  /* lay(10798000);  lights on for 3 hours */
+  /* delay ~3 hours */
+  LCDTimeLightsON();
 }
 
 void LCDthreeToSix(){
@@ -463,25 +459,23 @@ void nineToMidnight(){
   Serial.println("  /* ---(21:00 hours - pump 2 minutes: 120,000ms, Lights ON. Lights OFF at 00:00)---\n");
   getWaterTemp();
   getAirTemp();
-/* light off */
+  /* light off */
   digitalWrite(LightRelay_2, RELAY_OFF);
-/* set the Relay ON */
+  /* set the Relay ON */
   digitalWrite(PIN_PUMP_RELAY_1, RELAY_ON);
-/* pump 2 minutes */
+  /* pump 2 minutes */
   LCDTimePump();
   Serial.println("21:02");
   getWaterTemp();
   getAirTemp();
-/* set the Relay OFF */
+  /* set the Relay OFF */
   digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
-/* set the Relay ON */
+  /* set the Relay ON */
     digitalWrite(LightRelay_2, RELAY_ON);
-/*
- */
-/* lay(10798000); lights on for 3 hours */
-/* delay ~3 hours */
-     LCDTimeLightsON();
-/* ---(00:00 hours - Lights OFF. )--- */
+    /* lay(10798000); lights on for 3 hours */
+    /* delay ~3 hours */
+    LCDTimeLightsON();
+     /* ---(00:00 hours - Lights OFF. )--- */
 /* set the Relay OFF */
   digitalWrite(LightRelay_2, RELAY_OFF);
 }
@@ -502,8 +496,7 @@ void LCDnineToMidnight(){
   delay(2000);
   lcd.clear();
 }
-/* p
-   rints to LCD */
+/* prints to LCD */
 void LCDTesting(){
   lcd.begin(16,2);
   lcd.setCursor(0,0);
@@ -513,8 +506,7 @@ void LCDTesting(){
   delay(2000);
   lcd.clear();
 }
-/* p
-   rints to LCD */
+/* prints to LCD */
 void LCDFishFeederTestON(){
   lcd.begin(16,2);
   lcd.setCursor(0,0);
@@ -524,8 +516,7 @@ void LCDFishFeederTestON(){
   delay(2000);
   lcd.clear();
 }
-/* p
-   rints to LCD */
+/* prints to LCD */
 void LCDFishFeederTestOFF(){
   lcd.begin(16,2);
   lcd.setCursor(0,0);
@@ -535,8 +526,7 @@ void LCDFishFeederTestOFF(){
   delay(2000);
   lcd.clear();
 }
-/* p
-   rints to LCD */
+/* prints to LCD */
 void LCDLightTestON(){
   lcd.begin(16,2);
   lcd.setCursor(0,0);
@@ -546,8 +536,7 @@ void LCDLightTestON(){
   delay(2000);
   lcd.clear();
 }
-/* p
-   rints to LCD */
+/* prints to LCD */
 void LCDLightTestOFF(){
   lcd.begin(16,2);
   lcd.setCursor(0,0);
@@ -557,8 +546,7 @@ void LCDLightTestOFF(){
   delay(2000);
   lcd.clear();
 }
-/* p
-   rints to LCD */
+/* prints to LCD */
 void LCDPumpTestON(){
   lcd.begin(16,2);
   lcd.setCursor(0,0);
@@ -568,8 +556,7 @@ void LCDPumpTestON(){
   delay(2000);
   lcd.clear();
 }
-/* p
-   rints to LCD */
+/* prints to LCD */
 void LCDPumpTestOFF(){
   lcd.begin(16,2);
   lcd.setCursor(0,0);
@@ -579,8 +566,7 @@ void LCDPumpTestOFF(){
   delay(2000);
   lcd.clear();
 }
-/* p
-   rints to LCD */
+/* prints to LCD */
 void LCDLightsPumpTestON(){
   lcd.begin(16,2);
   lcd.setCursor(0,0);
@@ -590,8 +576,7 @@ void LCDLightsPumpTestON(){
   delay(2000);
   lcd.clear();
 }
-/* p
-   rints to LCD */
+/* prints to LCD */
 void LCDLightsPumpTestOFF(){
   lcd.begin(16,2);
   lcd.setCursor(0,0);
@@ -601,51 +586,48 @@ void LCDLightsPumpTestOFF(){
   delay(2000);
   lcd.clear();
 }
-/* t
-   ests for fish feeder pins 10-12-11-13 */
+/* tests for fish feeder pins 10-12-11-13 */
 void fishFeederTest(){
   LCDTesting();
   LCDFishFeederTestON();
   Serial.println("Testing, testing.\n");
   FishFeedersmall_stepper.setSpeed(75);
-/* Rotate CCW */
+  /* Rotate CCW */
   Steps2Take = -100;
   FishFeedersmall_stepper.step(Steps2Take);
   Serial.println("Fish Feeder takes -100 steps Counter Clock Wise.\n");
   delay(2500);
   FishFeedersmall_stepper.setSpeed(75);
-/* Rotate CW */
+  /* Rotate CW */
   Steps2Take = 100;
   FishFeedersmall_stepper.step(Steps2Take);
   LCDFishFeederTestOFF();
   Serial.println("Fish Feeder takes 100 steps Clock Wise.\n");
   delay(2500);
 }
-/* t
-   ests lights */
+/* tests lights */
 void lightTesting(){
   LCDLightTestON();
-/* set the Relay On */
+  /* set the Relay On */
   digitalWrite(LightRelay_2, RELAY_ON);
   Serial.println("Lights ON for 2.5 seconds.\n");
   delay(2500);
   lcd.begin(16,2);
   LCDLightTestOFF();
-/* set the Relay On */
+  /* set the Relay On */
   digitalWrite(LightRelay_2, RELAY_OFF);
   Serial.println("Lights OFF.\n");
   delay(2500);
 }
-/* t
-   ests pump */
+/* tests pump */
 void pumpTesting(){
   LCDPumpTestON();
-/* set the Relay ON */
+  /* set the Relay ON */
   digitalWrite(PIN_PUMP_RELAY_1, RELAY_ON);
   Serial.println("Pump ON for 2.5 seconds.\n");
   delay(2500);
   lcd.begin(16,2);
-/* set the Relay OFF */
+  /* set the Relay OFF */
   digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
   Serial.println("Pump OFF.\n");
   LCDPumpTestOFF();
@@ -675,8 +657,8 @@ void pumpOutTank(){
   /* pump 10 minutes; pump out tank */
   delay(600000000);
 }
-/* P
-   rint a Welcome message to the lcd with names of group members */
+
+/* Print a Welcome message to the lcd with names of group members */
 void LCDSetUp(){
   Serial.begin(38400);
   lcd.setCursor(0,0);
@@ -689,7 +671,7 @@ void LCDSetUp(){
   Serial.println("Begining setup, please wait.\n");
   delay(5000);
   lcd.setCursor(0, 0);
-/* print from 0 to 9: */
+  /* print from 0 to 9: */
   for (int thisChar = 0; thisChar < 15; thisChar++) {
     lcd.print(sean1[thisChar]);
     Serial.println(".\n");
@@ -697,21 +679,21 @@ void LCDSetUp(){
     Serial.println(".\n");
   }
   Serial.println("I present Sean Allred!!\n");
-/* set the cursor to (16,1): */
+  /* set the cursor to (16,1): */
   lcd.setCursor(16,1);
-/* set the display to automatically scroll: */
+  /* set the display to automatically scroll: */
   lcd.autoscroll();
-/* print from 0 to 9: */
+  /* print from 0 to 9: */
   for (int thisChar = 0; thisChar < 16; thisChar++) {
     lcd.print(sean2[thisChar]);
     delay(250);
   }
-/* turn off automatic scrolling */
+  /* turn off automatic scrolling */
   lcd.noAutoscroll();
-/* clear screen for the next loop: */
+  /* clear screen for the next loop: */
   lcd.clear();
   lcd.setCursor(0, 0);
-/* print from 0 to 9: */
+  /* print from 0 to 9: */
   for (int thisChar = 0; thisChar < 15; thisChar++) {
     lcd.print(libby1[thisChar]);
     Serial.println(".\n");
@@ -719,21 +701,21 @@ void LCDSetUp(){
     Serial.println(".\n");
   }
   Serial.println("I present Libby Glasgow!!\n");
-/* set the cursor to (16,1): */
+  /* set the cursor to (16,1): */
   lcd.setCursor(16,1);
-/* set the display to automatically scroll: */
+  /* set the display to automatically scroll: */
   lcd.autoscroll();
-/* print from 0 to 9: */
+  /* print from 0 to 9: */
   for (int thisChar = 0; thisChar < 16; thisChar++) {
     lcd.print(libby2[thisChar]);
     delay(250);
   }
-/* turn off automatic scrolling */
+  /* turn off automatic scrolling */
   lcd.noAutoscroll();
-/* clear screen for the next loop: */
+  /* clear screen for the next loop: */
   lcd.clear();
   lcd.setCursor(0, 0);
-/* print from 0 to 9: */
+  /* print from 0 to 9: */
   for (int thisChar = 0; thisChar < 15; thisChar++) {
     lcd.print(MC1[thisChar]);
     Serial.println(".\n");
@@ -741,21 +723,21 @@ void LCDSetUp(){
     Serial.println(".\n");
   }
   Serial.println("I present M.C. McCarthy!!\n");
-/* set the cursor to (16,1): */
+  /* set the cursor to (16,1): */
   lcd.setCursor(16,1);
-/* set the display to automatically scroll: */
+  /* set the display to automatically scroll: */
   lcd.autoscroll();
-/* print from 0 to 9: */
+  /* print from 0 to 9: */
   for (int thisChar = 0; thisChar < 16; thisChar++) {
     lcd.print(MC2[thisChar]);
     delay(250);
   }
-/* turn off automatic scrolling */
+  /* turn off automatic scrolling */
   lcd.noAutoscroll();
-/* clear screen for the next loop: */
+  /* clear screen for the next loop: */
   lcd.clear();
   lcd.setCursor(0, 0);
-/* print from 0 to 9: */
+  /* print from 0 to 9: */
   for (int thisChar = 0; thisChar < 15; thisChar++) {
     lcd.print(alexia1[thisChar]);
     Serial.println(".\n");
@@ -763,21 +745,21 @@ void LCDSetUp(){
     Serial.println(".\n");
   }
   Serial.println("I present Alexia Tanski!!\n");
-/* set the cursor to (16,1): */
+  /* set the cursor to (16,1): */
   lcd.setCursor(16,1);
-/* set the display to automatically scroll: */
+  /* set the display to automatically scroll: */
   lcd.autoscroll();
-/* print from 0 to 9: */
+  /* print from 0 to 9: */
   for (int thisChar = 0; thisChar < 16; thisChar++) {
     lcd.print(alexia2[thisChar]);
     delay(250);
   }
-/* turn off automatic scrolling */
+  /* turn off automatic scrolling */
   lcd.noAutoscroll();
-/* clear screen for the next loop: */
+  /* clear screen for the next loop: */
   lcd.clear();
   lcd.setCursor(0, 0);
-/* print from 0 to 9: */
+  /* print from 0 to 9: */
   for (int thisChar = 0; thisChar < 15; thisChar++) {
     lcd.print(james1[thisChar]);
     Serial.println(".\n");
@@ -785,11 +767,11 @@ void LCDSetUp(){
     Serial.println(".\n");
   }
   Serial.println("I present James Sappington!!\n");
-/* set the cursor to (16,1): */
+  /* set the cursor to (16,1): */
   lcd.setCursor(16,1);
-/* set the display to automatically scroll: */
+  /* set the display to automatically scroll: */
   lcd.autoscroll();
-/* print from 0 to 9: */
+  /* print from 0 to 9: */
   for (int thisChar = 0; thisChar < 16; thisChar++) {
     lcd.print(james2[thisChar]);
     delay(250);
@@ -797,18 +779,16 @@ void LCDSetUp(){
   for(int i =0; i<6;i++){
     Serial.println(".\n");
   }
-/* turn off automatic scrolling */
+  /* turn off automatic scrolling */
   lcd.noAutoscroll();
-/* clear screen for the next loop: */
+  /* clear screen for the next loop: */
   lcd.clear();
 }
 
 void getAirTemp() {
-/*
- */
-/* bildr.org/2011/07/ds18b20-arduino/"}}{\fldrslt{\ul\cf1 http:bildr.org/2011/07/ds18b20-arduino/}}}\f0\fs22  prints the */
+  /* bildr.org/2011/07/ds18b20-arduino/"}}{\fldrslt{\ul\cf1 http:bildr.org/2011/07/ds18b20-arduino/}}}\f0\fs22  prints the */
   /* adapted from {\field{\*\fldinst{HYPERLINK "http:    air temperature from one DS18S20 in degrees Celsius and
-   Fahrenheit */
+     Fahrenheit */
   Serial1.begin (38400);
   float AirTemperatureSum;
   byte data[12];
