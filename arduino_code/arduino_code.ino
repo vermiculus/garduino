@@ -1,4 +1,4 @@
--*- mode: c -*-
+/* -*- mode: c -*- */
 /* include the library code: */
 #include <LiquidCrystal.h>      /* http://www.fibidi.com/?p=734 */
 #include <OneWire.h>            /* DS18S20 Temperature */
@@ -30,25 +30,24 @@ Stepper FishFeedersmall_stepper(STEPS, 10, 12, 11, 13);
 
 LiquidCrystal lcd(9,8,5,4,3,2); /* LCD arduino pins set */
 
-/* Temperature chip i/o */
-OneWire water(PIN_WATER);
-OneWire air(PIN_AIR);
-
-long  get_seconds           ( int, int, int );
-long  get_milliseconds      ( int, int, int, int );
-void  lcd_display_message   ( char, char * );
-void  lcd_display_welcome   ( void );
-float get_air_temperature   ( void );
-float get_water_temperature ( void );
-int   get_hour              ( unsigned long );
-int   get_minute            ( unsigned long );
-int   get_second            ( unsigned long );
+long  get_seconds           ( int, int, int );      /* h m s */
+long  get_milliseconds      ( int, int, int, int ); /* h m s m */
+void  lcd_display_message   ( char, char * );       /* delim msg */
+float get_temperature       ( int );                /* pin */
+int   get_hour              ( unsigned long );      /* ms */
+int   get_minute            ( unsigned long );      /* ms */
+int   get_second            ( unsigned long );      /* ms */
 void  print_time            ( void );
+void  lcd_display_welcome   ( void );
+/* void  fmtDouble             ( double, short, char *, unsigned ); /* val precision buf len */
+/* void  fmtUnsigned           ( double, short, char *, unsigned ); /* val precision buf len */
+void fmtDouble(double val, byte precision, char *buf, unsigned bufLen = 0xffff);
+unsigned fmtUnsigned(unsigned long val, char *buf, unsigned bufLen = 0xffff, byte width = 0);
 
 short state;
 
 void setup() {
-  Serial1.begin(38400);
+  /* Serial1.begin(38400); */
   pinMode(PIN_PUMP_RELAY_1, OUTPUT);
   pinMode(LightRelay_2    , OUTPUT);
 
@@ -80,7 +79,7 @@ void loop() {
     test();
   }
 
-  print_time (&current_time);
+  print_time();
 
   day();
 }
@@ -731,8 +730,8 @@ void lcd_display_welcome() {
 /* Sensor Data Retrieval */
 
 /* Calculates and returns the water temperature as a float. */
-float get_temperature ( OneWire sensor ) {
-  Serial1.begin (38400);
+float get_temperature ( int pin ) {
+  OneWire sensor(pin);
   float temperature;
   byte data[12];
   byte addr[8];
@@ -749,7 +748,7 @@ float get_temperature ( OneWire sensor ) {
     Serial.print("Device is not recognized.\n");
     temperature = -1000;
   }
-  if (sensor == air) {
+  if (pin == PIN_AIR) {
     sensor.write(0x44, 1); /// TODO: Why?
   }
   sensor.reset();
@@ -777,7 +776,7 @@ float get_temperature ( OneWire sensor ) {
 /* Utility Functions */
 
 char *get_spaces(int n) {
-  return malloc(n*sizeof(char))
+  return (char*)malloc(n*sizeof(char));
 }
 
 long get_seconds(int h, int m, int s) {
@@ -791,24 +790,13 @@ long get_milliseconds(int h, int m, int s, int ms) {
 enum STATE {
 };
 
-void update_time(Time *time) {
-  unsigned long m = millis();
-  time->hour = m / 1000*60*60;
-  m = m % 1000*60*60;
-  time->minute = m / 1000*60;
-  m = m % 1000*60;
-  time->second = m / 1000;
-  m = m % 1000;
-  time->millisecond = m;
-}
-
-int get_hour   ( unsigned long m ) { return m / 1000 * 60 * 60 }
-int get_minute ( unsigned long m ) { return m / 1000 * 60      }
-int get_second ( unsigned long m ) { return m / 1000           }
+int get_hour   ( unsigned long m ) { return m / 1000 * 60 * 60 ; }
+int get_minute ( unsigned long m ) { return m / 1000 * 60      ; }
+int get_second ( unsigned long m ) { return m / 1000           ; }
 
 void print_time( void ) {
   unsigned long m = millis();
-  Serial.print(get_hour(m)); Serial.print(':');
+  Serial.print(get_hour  (m)); Serial.print(':');
   Serial.print(get_minute(m)); Serial.print(':');
   Serial.print(get_second(m)); Serial.print(':');
   Serial.print(m);
@@ -877,6 +865,52 @@ void fmtDouble(double val, byte precision, char *buf, unsigned bufLen) {
 
   /* null-terminate the string */
   *buf = '\0';
+}
+
+
+
+
+
+
+//
+// Produce a formatted string in a buffer corresponding to the value provided.
+// If the 'width' parameter is non-zero, the value will be padded with leading
+// zeroes to achieve the specified width.  The number of characters added to
+// the buffer (not including the null termination) is returned.
+//
+unsigned
+fmtUnsigned(unsigned long val, char *buf, unsigned bufLen, byte width)
+{
+  if (!buf || !bufLen)
+    return(0);
+
+  // produce the digit string (backwards in the digit buffer)
+  char dbuf[10];
+  unsigned idx = 0;
+  while (idx < sizeof(dbuf))
+  {
+    dbuf[idx++] = (val % 10) + '0';
+    if ((val /= 10) == 0)
+      break;
+  }
+
+  // copy the optional leading zeroes and digits to the target buffer
+  unsigned len = 0;
+  byte padding = (width > idx) ? width - idx : 0;
+  char c = '0';
+  while ((--bufLen > 0) && (idx || padding))
+  {
+    if (padding)
+      padding--;
+    else
+      c = dbuf[--idx];
+    *buf++ = c;
+    len++;
+  }
+
+  // add the null termination
+  *buf = '\0';
+  return(len);
 }
 
 
