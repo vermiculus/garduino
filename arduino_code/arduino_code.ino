@@ -24,12 +24,14 @@ LiquidCrystal lcd(9,8,5,4,3,2); /* LCD arduino pins set */
 OneWire water(PIN_WATER);
 OneWire air(PIN_AIR);
 
- long get_seconds           (  int  hours, int minutes, int seconds                   );
- long get_milliseconds      (  int  hours, int minutes, int seconds, int milliseconds );
- void lcd_display_message   ( char  delim, char *msg                                  );
- void lcd_display_welcome   ( void );
+long  get_seconds           ( int, int, int );
+long  get_milliseconds      ( int, int, int, int );
+void  lcd_display_message   ( char, char * );
+void  lcd_display_welcome   ( void );
 float get_air_temperature   ( void );
 float get_water_temperature ( void );
+void  update_time           ( Time *);
+void  print_time            ( Time *);
 
 typedef struct SIMPLE_TIME {
   unsigned int hour;
@@ -797,6 +799,31 @@ long get_seconds(int h, int m, int s) {
 
 long get_milliseconds(int h, int m, int s, int ms) {
   return get_seconds(h, m, s) * 1000 + ms;
+}
+
+struct SIMPLE_TIME {
+  unsigned int hour;
+  unsigned int minute;
+  unsigned int second;
+  unsigned int millisecond;
+};
+
+void update_time(Time *time) {
+  unsigned long m = millis();
+  time->hour = m / 1000*60*60;
+  m = m % 1000*60*60;
+  time->minute = m / 1000*60;
+  m = m % 1000*60;
+  time->second = m / 1000;
+  m = m % 1000;
+  time->millisecond = m;
+}
+
+void print_time(Time *time) {
+  Serial.print(time->hour); Serial.print(':');
+  Serial.print(time->minute); Serial.print(':');
+  Serial.print(time->second); Serial.print(':');
+  Serial.print(time->millisecond);
 }
 
 /*
