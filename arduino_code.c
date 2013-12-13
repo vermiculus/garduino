@@ -36,16 +36,16 @@ char alexia2 [17] = "Tanski          ";
 char james1  [17] = "James           ";
 char james2  [17] = "Sappington      ";
 
-long get_seconds(int hours, int minutes, int seconds);
-long get_milliseconds(int hours, int minutes, int seconds, int milliseconds);
+long get_seconds         (  int  hours, int minutes, int seconds                   );
+long get_milliseconds    (  int  hours, int minutes, int seconds, int milliseconds );
+void lcd_display_message ( char  delim, char *msg                                  );
+void lcd_display_welcome ( void )
 
 void setup() {
-  /* sets LCD screen as 16 characters by 2 rows */
   lcd.begin(16, 2);
-  /* Initial LCD Display */
   /* calls welcome message with names */
-  /* LCDSetUp(); */
-  /* Initial LCD Display */
+  lcd_display_welcome();
+
   /* set the speed of the stepper motor */
   FishFeedersmall_stepper.setSpeed(STEPPER_SPEED);
   /* for pH sensor */
@@ -935,7 +935,7 @@ char *get_spaces(int n) {
 
 /* Prints a two-line `message` to the LCD screen using a lime
    delimiter `delim`. */
-void lcd_display_message(char *message, char delim) {
+void lcd_display_message(char delim, char *message) {
   char *line_1 = get_spaces(17);
   char *line_2 = get_spaces(17);
 
@@ -979,6 +979,20 @@ void lcd_display_message(char *message, char delim) {
   free(line_1);
   free(line_2);
 }
+
+void lcd_display_welcome() {
+  const long DELAY_TIME = get_seconds(0, 0, 5);
+  lcd_display_message(':', "Sean:Allred");
+  delay(DELAY_TIME);
+  lcd_display_message(':', "Libby:Glasgow");
+  delay(DELAY_TIME);
+  lcd_display_message(':', "Mary Claire:McCarthy");
+  delay(DELAY_TIME);
+  lcd_display_message(':', "Alexia:Tanski");
+  delay(DELAY_TIME);
+  lcd_display_message(':', "James:Sappington");
+}
+
 /* Local Variables: */
 /* indent-tabs-mode: nil */
 /* End: */
