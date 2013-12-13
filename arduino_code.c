@@ -927,6 +927,57 @@ long get_seconds(int h, int m, int s) {
 long get_milliseconds(int h, int m, int s, int ms) {
   return get_seconds(h, m, s) * 1000 + ms;
 }
+
+char *get_spaces(int n) {
+  return malloc(n*sizeof(char))
+}
+
+/* Prints a two-line `message` to the LCD screen using a lime
+   delimiter `delim`. */
+void lcd_display_message(char *message, char delim) {
+  char *line_1 = get_spaces(17);
+  char *line_2 = get_spaces(17);
+
+  /*
+    Set the cell of the first line to the character currently pointed
+    to by `message`.  When the statement finished, both the current
+    column and the `message` are incremented.  (Note that incrementing
+    `message` will cause `message` to point to the next character in
+    the screen.  The next is the same as previous, but checking
+    against EOF (null terminator used by default in C strings) instead
+    of newline.
+  */
+  int col = 0;
+  while(*message != delim) {
+    line_1[col] = *message;
+
+    col     += 1;
+    message += 1;
+  }
+  col = 0;
+  message++;
+  while(*message != '\0') {
+    line_2[col] = *message;
+
+    col     += 1;
+    message += 1;
+  }
+
+  /* Clear the screen so we can write cleanly */
+  lcd.clear();
+
+  /* Set the insertion point at row=0, col=0 and print `line_1` */
+  lcd.setCursor(0, 0);
+  lcd.print(line_1);
+  /* Set the insertion point at row=0, col=1 and print `line_2` */
+  lcd.setCursor(0, 1);
+  lcd.print(line_2);
+
+  /* Since these lines were returned by `get_spaces` which uses
+     `malloc`, they must be `free`d. */
+  free(line_1);
+  free(line_2);
+}
 /* Local Variables: */
 /* indent-tabs-mode: nil */
 /* End: */
