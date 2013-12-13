@@ -106,9 +106,9 @@ void day(){
 }
 
 void theMidnightHour(){
-  Serial.println("The Midnight Hour: 00:00 hours - pump 2 minutes: 120,000ms")
-  getWaterTemp();
-  getAirTemp();
+  Serial.println("The Midnight Hour: 00:00 hours - pump 2 minutes: 120,000ms");
+  get_temperature(PIN_WATER);
+  get_temperature(PIN_AIR);
   LCDtheMidnightHour();
   /* set the Relay ON */
   digitalWrite(PIN_PUMP_RELAY_1, RELAY_ON);
@@ -118,8 +118,8 @@ void theMidnightHour(){
   digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
   Serial.println("00:02\n");
   LCDTimeLightsOFF();
-  getWaterTemp();
-  getAirTemp();
+  get_temperature(PIN_WATER);
+  get_temperature(PIN_AIR);
 }
 
 void LCDTimeLightsOFF(){
@@ -200,8 +200,8 @@ void LCDtheMidnightHour(){
 }
 
 void threeToSixAM(){
-  getWaterTemp();
-  getAirTemp();
+  get_temperature(PIN_WATER);
+  get_temperature(PIN_AIR);
   LCDthreeToSixAM();
   Serial.println("/* ---(03:00 hours - pump 2 minutes: 120,000ms)---\n");
   /* set the Relay ON */
@@ -214,8 +214,8 @@ void threeToSixAM(){
   /* delay(10798000); */
   /* delay ~3 hours */
   LCDTimeLightsOFF();
-  getWaterTemp();
-  getAirTemp();
+  get_temperature(PIN_WATER);
+  get_temperature(PIN_AIR);
 }
 
 void LCDthreeToSixAM(){
@@ -229,12 +229,12 @@ void LCDthreeToSixAM(){
 }
 
 void sixToNineAM(){
-  getWaterTemp();
-  getAirTemp();
+  get_temperature(PIN_WATER);
+  get_temperature(PIN_AIR);
   LCDsixToNineAM();
   Serial.println("  /* ---(06:00 hours - pump 2 minutes: 120,000ms, Lights ON, Camera takes picture. )---\n");
-  getWaterTemp();
-  getAirTemp();
+  get_temperature(PIN_WATER);
+  get_temperature(PIN_AIR);
   /* set the Relay ON */
   digitalWrite(PIN_PUMP_RELAY_1, RELAY_ON);
   /* pump 2 minutes */
@@ -242,8 +242,8 @@ void sixToNineAM(){
   /* set the Relay ON */
   digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
   Serial.println("06:02");
-  getWaterTemp();
-  getAirTemp();
+  get_temperature(PIN_WATER);
+  get_temperature(PIN_AIR);
   /* set the Relay On */
   digitalWrite(LightRelay_2, RELAY_ON);
   /* delay(10798000); */
@@ -269,12 +269,12 @@ void LCDsixToNineAM(){
 }
 
 void nineToNoon(){
-  getWaterTemp();
-  getAirTemp();
+  get_temperature(PIN_WATER);
+  get_temperature(PIN_AIR);
   LCDnineToNoon();
   Serial.println("---(09:00 - pump 2 minutes: 120,000ms, Lights ON)---\n");
-  getWaterTemp();
-  getAirTemp();
+  get_temperature(PIN_WATER);
+  get_temperature(PIN_AIR);
   /* light off */
   digitalWrite(LightRelay_2, RELAY_OFF);
   /* set the Relay ON */
@@ -284,8 +284,8 @@ void nineToNoon(){
   /* set the Relay ON */
   digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
   Serial.println("09:02");
-  getWaterTemp();
-  getAirTemp();
+  get_temperature(PIN_WATER);
+  get_temperature(PIN_AIR);
   /* set the Relay On */
   digitalWrite(LightRelay_2, RELAY_ON);
   /* delay(10798000);  lights on for 3 hours */
@@ -311,8 +311,8 @@ void LCDnineToNoon(){
 }
 
 void noonToThree(){
-  getWaterTemp();
-  getAirTemp();
+  get_temperature(PIN_WATER);
+  get_temperature(PIN_AIR);
   LCDNoonToThree();
   Serial.println("/* ---(12:00 hours - pump 4 minutes: 120,000ms, Lights ON, Feed fish: -1500 CCW, LUNCH TIME!!. )---\n");
   LCDFishFeeder();
@@ -330,8 +330,8 @@ void noonToThree(){
   /* set the Relay ON */
   digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
   Serial.println("12:02\n");
-  getWaterTemp();
-  getAirTemp();
+  get_temperature(PIN_WATER);
+  get_temperature(PIN_AIR);
   /* set the light Relay On */
   digitalWrite(LightRelay_2, RELAY_ON);
   /* elay(10798000);  lights on for 3 hours */
@@ -382,8 +382,8 @@ void LCDNoonToThree(){
 
 void threeToSixPM(){
   Serial.println("  /* ---(15:00 hours - pump 2 minutes: 120,000ms, Lights ON. )---\n");
-  getWaterTemp();
-  getAirTemp();
+  get_temperature(PIN_WATER);
+  get_temperature(PIN_AIR);
   LCDthreeToSix();
   /* light off at 15:00 for 2 minutes while pump runs */
   digitalWrite(LightRelay_2, RELAY_OFF);
@@ -396,8 +396,8 @@ void threeToSixPM(){
   Serial.println("15:02\n");
   /* set the Relay On */
   digitalWrite(LightRelay_2, RELAY_ON);
-  getWaterTemp();
-  getAirTemp();
+  get_temperature(PIN_WATER);
+  get_temperature(PIN_AIR);
   /* lay(10798000);  lights on for 3 hours */
   /* delay ~3 hours */
   LCDTimeLightsON();
@@ -421,12 +421,12 @@ void LCDthreeToSix(){
 }
 
 void sixToNinePM(){
-  getWaterTemp();
-  getAirTemp();
+  get_temperature(PIN_WATER);
+  get_temperature(PIN_AIR);
   LCDsixToNinePM();
   Serial.println("/* ---(18:00 hours - pump 4 minutes: 120,000ms, Lights ON. )---\n");
-  getWaterTemp();
-  getAirTemp();
+  get_temperature(PIN_WATER);
+  get_temperature(PIN_AIR);
   /* light off at 18:00 for 2 minutes while pump runs */
   digitalWrite(LightRelay_2, RELAY_OFF);
   /* set the Relay ON */
@@ -438,8 +438,8 @@ void sixToNinePM(){
   Serial.println("18:02");
   /* set the Relay On */
   digitalWrite(LightRelay_2, RELAY_ON);
-  getWaterTemp();
-  getAirTemp();
+  get_temperature(PIN_WATER);
+  get_temperature(PIN_AIR);
   /* elay(10798000);  lights on for 3 hours */
   /* delay ~3 hours */
   LCDTimeLightsON();
@@ -463,12 +463,12 @@ void LCDsixToNinePM(){
 }
 
 void nineToMidnight(){
-  getWaterTemp();
-  getAirTemp();
+  get_temperature(PIN_WATER);
+  get_temperature(PIN_AIR);
   LCDnineToMidnight();
   Serial.println("  /* ---(21:00 hours - pump 2 minutes: 120,000ms, Lights ON. Lights OFF at 00:00)---\n");
-  getWaterTemp();
-  getAirTemp();
+  get_temperature(PIN_WATER);
+  get_temperature(PIN_AIR);
   /* light off */
   digitalWrite(LightRelay_2, RELAY_OFF);
   /* set the Relay ON */
@@ -476,8 +476,8 @@ void nineToMidnight(){
   /* pump 2 minutes */
   LCDTimePump();
   Serial.println("21:02");
-  getWaterTemp();
-  getAirTemp();
+  get_temperature(PIN_WATER);
+  get_temperature(PIN_AIR);
   /* set the Relay OFF */
   digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
   /* set the Relay ON */
@@ -770,7 +770,7 @@ float get_temperature ( OneWire sensor ) {
   /* using two's complement */
   float tempRead = ((MSB << 8)| LSB);
   temperature = tempRead / 16;
-  /* getWaterTemp(); */
+  /* get_temperature(PIN_WATER); */
   return temperature;
 }
 
