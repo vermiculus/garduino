@@ -7,6 +7,7 @@
 // TODO: To avoid using delay() everywhere, use millis(): http://arduino.cc/en/Tutorial/BlinkWithoutDelay
 
 #define STEPS            100 /* Number of steps per revolution stepper motor FISH FEEDER */
+#define STEPPER_SPEED    200
 #define RELAY_ON           0 /* relay on */
 #define RELAY_OFF          1 /* relay off */
 #define PIN_PUMP_RELAY_1  22 /* Arduino Digital I/O pin number pump */
@@ -46,7 +47,7 @@ void setup() {
   /* LCDSetUp(); */
   /* Initial LCD Display */
   /* set the speed of the stepper motor */
-  FishFeedersmall_stepper.setSpeed(200);
+  FishFeedersmall_stepper.setSpeed(STEPPER_SPEED);
   /* for pH sensor */
   Serial1.begin (38400);
   /* Set Relays OFF */
