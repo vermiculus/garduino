@@ -36,27 +36,56 @@ char alexia2 [17] = "Tanski          ";
 char james1  [17] = "James           ";
 char james2  [17] = "Sappington      ";
 
-long get_seconds         (  int  hours, int minutes, int seconds                   );
-long get_milliseconds    (  int  hours, int minutes, int seconds, int milliseconds );
-void lcd_display_message ( char  delim, char *msg                                  );
-void lcd_display_welcome ( void )
+ long get_seconds           (  int  hours, int minutes, int seconds                   );
+ long get_milliseconds      (  int  hours, int minutes, int seconds, int milliseconds );
+ void lcd_display_message   ( char  delim, char *msg                                  );
+ void lcd_display_welcome   ( void );
+float get_air_temperature   ( void );
+float get_water_temperature ( void );
+
+typedef struct SIMPLE_TIME {
+  unsigned int hour;
+  unsigned int minute;
+  unsigned int second;
+  unsigned int millisecond;
+} Time;
+
+Time current_time;
+
+void update_time(Time *time) {
+  unsigned long m = millis();
+  time->hour = m / 1000*60*60;
+  m = m % 1000*60*60;
+  time->minute = m / 1000*60;
+  m = m % 1000*60;
+  time->second = m / 1000;
+  m = m % 1000;
+  time->millisecond = m;
+}
+void print_time(Time *time) {
+  Serial.print(time->hour); Serial.print(':');
+  Serial.print(time->minute); Serial.print(':');
+  Serial.print(time->second); Serial.print(':');
+  Serial.print(time->millisecond);
+}
 
 void setup() {
+  Serial1.begin(38400);
+  pinMode(PIN_PUMP_RELAY_1, OUTPUT);
+  pinMode(LightRelay_2    , OUTPUT);
+
   lcd.begin(16, 2);
-  /* calls welcome message with names */
-  lcd_display_welcome();
 
   /* set the speed of the stepper motor */
   FishFeedersmall_stepper.setSpeed(STEPPER_SPEED);
-  /* for pH sensor */
-  Serial1.begin (38400);
-  /* Set Relays OFF */
+
   digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
-  digitalWrite(LightRelay_2, RELAY_OFF);
-  /* Set pins as outputs */
-  pinMode(PIN_PUMP_RELAY_1, OUTPUT);
-  pinMode(LightRelay_2, OUTPUT);
-  /* Check that all relays are inactive at Reset */
+  digitalWrite(LightRelay_2    , RELAY_OFF);
+
+  /* calls welcome message with names */
+  lcd_display_welcome();
+
+  /* Ensure that all relays are inactive at Reset */
   delay(4000);
 }
 
@@ -72,6 +101,10 @@ void loop() {
   if(false) {
     test();
   }
+
+  update_time(&current_time);
+  print_time (&current_time);
+
   day();
 }
 
