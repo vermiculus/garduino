@@ -18,7 +18,6 @@
 /* 1-3-2-4 for proper sequencing of stepper motor FISH FEEDER  */
 Stepper FishFeedersmall_stepper(STEPS, 10, 12, 11, 13);
 
-int Steps2Take;                 /* step variable */
 LiquidCrystal lcd(9,8,5,4,3,2); /* LCD arduino pins set */
 
 /* Temperature chip i/o */
@@ -331,9 +330,8 @@ void noonToThree(){
   /* *******************************************FISH FEEDER****************************************************************************** */
   FishFeedersmall_stepper.setSpeed(75);
   /* Rotate CCW...Adjust as seems fit...must be negative (-) integer to turn Fish Feeder Counter Clock Wise */
-  Steps2Take = -1500;
   /* *******************************************FISH FEEDER************************************************************************** */
-  FishFeedersmall_stepper.step(Steps2Take);
+  FishFeedersmall_stepper.step(-1500);
   /* light off at 12 Noon for 2 minutes while pump runs */
   digitalWrite(LightRelay_2, RELAY_OFF);
   /* set the Relay ON */
@@ -616,14 +614,12 @@ void fishFeederTest(){
   Serial.println("Testing, testing.\n");
   FishFeedersmall_stepper.setSpeed(75);
   /* Rotate CCW */
-  Steps2Take = -100;
-  FishFeedersmall_stepper.step(Steps2Take);
+  FishFeedersmall_stepper.step(-100);
   Serial.println("Fish Feeder takes -100 steps Counter Clock Wise.\n");
   delay(2500);
   FishFeedersmall_stepper.setSpeed(75);
   /* Rotate CW */
-  Steps2Take = 100;
-  FishFeedersmall_stepper.step(Steps2Take);
+  FishFeedersmall_stepper.step(100);
   LCDFishFeederTestOFF();
   Serial.println("Fish Feeder takes 100 steps Clock Wise.\n");
   delay(2500);
