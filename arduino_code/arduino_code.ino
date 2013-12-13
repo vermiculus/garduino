@@ -15,6 +15,15 @@
 #define PIN_WATER          7 /* DS18S20 Signal pin on digital 7 */
 #define PIN_AIR            6 /* DS18S20 Signal pin on digital 6 */
 
+#define _0000_0300_        1    /* midnight to 3am      */
+#define _0300_0600_        2    /*      3am to 6am      */
+#define _0600_0900_        3    /*      6am to 9am      */
+#define _0900_1200_        4    /*      9am to noon     */
+#define _1200_1500_        5    /*     noon to 3pm      */
+#define _1500_1800_        6    /*      3pm to 6pm      */
+#define _1800_2100_        7    /*      6pm to 9pm      */
+#define _2100_2400_        8    /*      9pm to midnight */
+
 /* 1-3-2-4 for proper sequencing of stepper motor FISH FEEDER  */
 Stepper FishFeedersmall_stepper(STEPS, 10, 12, 11, 13);
 
@@ -30,15 +39,12 @@ void  lcd_display_message   ( char, char * );
 void  lcd_display_welcome   ( void );
 float get_air_temperature   ( void );
 float get_water_temperature ( void );
-void  update_time           ( Time *);
-void  print_time            ( Time *);
+int   get_hour              ( unsigned long );
+int   get_minute            ( unsigned long );
+int   get_second            ( unsigned long );
+void  print_time            ( void );
 
-typedef struct SIMPLE_TIME Time;
-typedef enum   STATE       State;
-
-Time current_time;
-
-
+short state;
 
 void setup() {
   Serial1.begin(38400);
@@ -73,7 +79,6 @@ void loop() {
     test();
   }
 
-  update_time(&current_time);
   print_time (&current_time);
 
   day();
@@ -782,22 +787,7 @@ long get_milliseconds(int h, int m, int s, int ms) {
   return get_seconds(h, m, s) * 1000 + ms;
 }
 
-struct SIMPLE_TIME {
-  unsigned int hour;
-  unsigned int minute;
-  unsigned int second;
-  unsigned int millisecond;
-};
-
 enum STATE {
-  _0000_0300_,
-  _0300_0600_,
-  _0600_0900_,
-  _0900_1200_,
-  _1200_1500_,
-  _1500_1800_,
-  _1800_2100_,
-  _2100_2400_
 };
 
 void update_time(Time *time) {
@@ -811,11 +801,16 @@ void update_time(Time *time) {
   time->millisecond = m;
 }
 
-void print_time(Time *time) {
-  Serial.print(time->hour); Serial.print(':');
-  Serial.print(time->minute); Serial.print(':');
-  Serial.print(time->second); Serial.print(':');
-  Serial.print(time->millisecond);
+int get_hour   ( unsigned long m ) { return m / 1000 * 60 * 60 }
+int get_minute ( unsigned long m ) { return m / 1000 * 60      }
+int get_second ( unsigned long m ) { return m / 1000           }
+
+void print_time( void ) {
+  unsigned long m = millis();
+  Serial.print(get_hour(m)); Serial.print(':');
+  Serial.print(get_minute(m)); Serial.print(':');
+  Serial.print(get_second(m)); Serial.print(':');
+  Serial.print(m);
 }
 
 /*
