@@ -25,17 +25,6 @@ int Air_Pin   = 6;              /* DS18S20 Signal pin on digital 6 */
 OneWire water(Water_Pin);
 OneWire air(Air_Pin);
 
-char sean1   [17] = "Sean            ";
-char sean2   [17] = "Allred          ";
-char libby1  [17] = "Libby           ";
-char libby2  [17] = "Glasgow         ";
-char MC1     [17] = "Mary Claire     ";
-char MC2     [17] = "McCarthy        ";
-char alexia1 [17] = "Alexia          ";
-char alexia2 [17] = "Tanski          ";
-char james1  [17] = "James           ";
-char james2  [17] = "Sappington      ";
-
  long get_seconds           (  int  hours, int minutes, int seconds                   );
  long get_milliseconds      (  int  hours, int minutes, int seconds, int milliseconds );
  void lcd_display_message   ( char  delim, char *msg                                  );
