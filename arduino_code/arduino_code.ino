@@ -30,19 +30,17 @@ Stepper FishFeedersmall_stepper(STEPS, 10, 12, 11, 13);
 
 LiquidCrystal lcd(9,8,5,4,3,2); /* LCD arduino pins set */
 
-long  get_seconds           ( int, int, int );      /* h m s */
-long  get_milliseconds      ( int, int, int, int ); /* h m s m */
-void  lcd_display_message   ( char, char * );       /* delim msg */
-float get_temperature       ( int );                /* pin */
-int   get_hour              ( unsigned long );      /* ms */
-int   get_minute            ( unsigned long );      /* ms */
-int   get_second            ( unsigned long );      /* ms */
-void  print_time            ( void );
-void  lcd_display_welcome   ( void );
-/* void  fmtDouble             ( double, short, char *, unsigned ); /* val precision buf len */
-/* void  fmtUnsigned           ( double, short, char *, unsigned ); /* val precision buf len */
-void fmtDouble(double val, byte precision, char *buf, unsigned bufLen = 0xffff);
-unsigned fmtUnsigned(unsigned long val, char *buf, unsigned bufLen = 0xffff, byte width = 0);
+long     get_seconds           ( int, int, int );      /* h m s */
+long     get_milliseconds      ( int, int, int, int ); /* h m s m */
+void     lcd_display_message   ( char, char * );       /* delim msg */
+float    get_temperature       ( int );                /* pin */
+int      get_hour              ( unsigned long );      /* ms */
+int      get_minute            ( unsigned long );      /* ms */
+int      get_second            ( unsigned long );      /* ms */
+void     print_time            ( void );
+void     lcd_display_welcome   ( void );
+void     fmtDouble             ( double val, byte precision, char *buf, unsigned bufLen = 0xffff);
+unsigned fmtUnsigned           ( unsigned long val, char *buf, unsigned bufLen = 0xffff, byte width = 0);
 
 short state;
 
@@ -71,7 +69,6 @@ void loop() {
     PUMP OUT TANK
     Unhook hose from back of tank and put it in a bucket.
   */
-  /* delay(5000); */
   if(false) {
     pumpOutTank();
   }
@@ -122,13 +119,6 @@ void theMidnightHour(){
 }
 
 void LCDTimeLightsOFF(){
-  /*
-     int twoMin = 120;
-     int sec = 1;
-     int minute = 60;
-     int hour = 3600;
-     15;
-  */
   for(int i = get_seconds(2, 59, 50) ; i>=0 ; i--) {
     Serial.println("#");
     lcd.begin(16,2);
@@ -142,13 +132,6 @@ void LCDTimeLightsOFF(){
 }
 
 void LCDTimeLightsON(){
-  /* 
-     int twoMin = 120;
-     int sec = 1;
-     int minute = 60;
-     int hour = 3600;
-  */
-  /* 15; */
   for(int i = get_seconds(2, 59, 50);i>=0;i--){
     Serial.println("*");
     lcd.begin(16,2);
@@ -162,13 +145,6 @@ void LCDTimeLightsON(){
 }
 
 void LCDTimePump(){
-  /* used to be 12 */
-  /* int sec = 1; */
-  /*
-    int minute = 60; 
-    int hour = 3600; 
-    int threehoursMinusTwo = 10798;
-  */
   for(int i = get_seconds(0, 2, 0); i >= 0; i--) {
     Serial.println("$");
     lcd.begin(16,2);
@@ -246,7 +222,7 @@ void sixToNineAM(){
   /* set the Relay On */
   digitalWrite(LightRelay_2, RELAY_ON);
   /* delay(10798000); */
-/* delay ~3 hours */
+  /* delay ~3 hours */
   LCDTimeLightsON();
 }
 
@@ -315,10 +291,10 @@ void noonToThree(){
   LCDNoonToThree();
   Serial.println("/* ---(12:00 hours - pump 4 minutes: 120,000ms, Lights ON, Feed fish: -1500 CCW, LUNCH TIME!!. )---\n");
   LCDFishFeeder();
-  /* *******************************************FISH FEEDER****************************************************************************** */
+  /* Fish Feeder */
   FishFeedersmall_stepper.setSpeed(75);
   /* Rotate CCW...Adjust as seems fit...must be negative (-) integer to turn Fish Feeder Counter Clock Wise */
-  /* *******************************************FISH FEEDER************************************************************************** */
+  /* Fish Feeder */
   FishFeedersmall_stepper.step(-1500);
   /* light off at 12 Noon for 2 minutes while pump runs */
   digitalWrite(LightRelay_2, RELAY_OFF);
@@ -480,12 +456,12 @@ void nineToMidnight(){
   /* set the Relay OFF */
   digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
   /* set the Relay ON */
-    digitalWrite(LightRelay_2, RELAY_ON);
-    /* lay(10798000); lights on for 3 hours */
-    /* delay ~3 hours */
-    LCDTimeLightsON();
-     /* ---(00:00 hours - Lights OFF. )--- */
-/* set the Relay OFF */
+  digitalWrite(LightRelay_2, RELAY_ON);
+  /* lay(10798000); lights on for 3 hours */
+  /* delay ~3 hours */
+  LCDTimeLightsON();
+  /* ---(00:00 hours - Lights OFF. )--- */
+  /* set the Relay OFF */
   digitalWrite(LightRelay_2, RELAY_OFF);
 }
 
@@ -667,7 +643,7 @@ void pumpOutTank(){
 
 /* Output Routines */
 
-/* Prints a two-line `message` to the LCD screen using a lime
+/* Prints a two-line `message` to the LCD screen using a line
    delimiter `delim`. */
 void lcd_display_message(char delim, char *message) {
   char *line_1 = get_spaces(17);
@@ -787,9 +763,6 @@ long get_milliseconds(int h, int m, int s, int ms) {
   return get_seconds(h, m, s) * 1000 + ms;
 }
 
-enum STATE {
-};
-
 int get_hour   ( unsigned long m ) { return m / 1000 * 60 * 60 ; }
 int get_minute ( unsigned long m ) { return m / 1000 * 60      ; }
 int get_second ( unsigned long m ) { return m / 1000           ; }
@@ -868,47 +841,44 @@ void fmtDouble(double val, byte precision, char *buf, unsigned bufLen) {
 }
 
 
-
-
-
-
-//
-// Produce a formatted string in a buffer corresponding to the value provided.
-// If the 'width' parameter is non-zero, the value will be padded with leading
-// zeroes to achieve the specified width.  The number of characters added to
-// the buffer (not including the null termination) is returned.
-//
-unsigned
-fmtUnsigned(unsigned long val, char *buf, unsigned bufLen, byte width)
-{
-  if (!buf || !bufLen)
+/*
+  Produce a formatted string in a buffer corresponding to the value
+  provided.  If the 'width' parameter is non-zero, the value will be
+  padded with leading zeroes to achieve the specified width.  The
+  number of characters added to the buffer (not including the null
+  termination) is returned.
+*/
+unsigned fmtUnsigned(unsigned long val, char *buf, unsigned bufLen, byte width) {
+  if (!buf || !bufLen) {
     return(0);
-
-  // produce the digit string (backwards in the digit buffer)
-  char dbuf[10];
-  unsigned idx = 0;
-  while (idx < sizeof(dbuf))
-  {
-    dbuf[idx++] = (val % 10) + '0';
-    if ((val /= 10) == 0)
-      break;
   }
 
-  // copy the optional leading zeroes and digits to the target buffer
+  /* produce the digit string (backwards in the digit buffer) */
+  char dbuf[10];
+  unsigned idx = 0;
+  while (idx < sizeof(dbuf)) {
+    dbuf[idx++] = (val % 10) + '0';
+    if ((val /= 10) == 0) {
+      break;
+    }
+  }
+
+  /* copy the optional leading zeroes and digits to the target buffer */
   unsigned len = 0;
   byte padding = (width > idx) ? width - idx : 0;
   char c = '0';
   while ((--bufLen > 0) && (idx || padding))
   {
-    if (padding)
+    if (padding) {
       padding--;
-    else
+    } else {
       c = dbuf[--idx];
+    }
     *buf++ = c;
     len++;
   }
 
-  // add the null termination
+  /* add the null termination */
   *buf = '\0';
   return(len);
 }
