@@ -12,18 +12,18 @@
 #define RELAY_OFF          1 /* relay off */
 #define PIN_PUMP_RELAY_1  22 /* Arduino Digital I/O pin number pump */
 #define LightRelay_2      24 /* Arduino Digital I/O pin number lights */
+#define PIN_WATER          7 /* DS18S20 Signal pin on digital 7 */
+#define PIN_AIR            6 /* DS18S20 Signal pin on digital 6 */
 
 /* 1-3-2-4 for proper sequencing of stepper motor FISH FEEDER  */
 Stepper FishFeedersmall_stepper(STEPS, 10, 12, 11, 13);
 
 int Steps2Take;                 /* step variable */
 LiquidCrystal lcd(9,8,5,4,3,2); /* LCD arduino pins set */
-int Water_Pin = 7;              /* DS18S20 Signal pin on digital 7 */
-int Air_Pin   = 6;              /* DS18S20 Signal pin on digital 6 */
 
 /* Temperature chip i/o */
-OneWire water(Water_Pin);
-OneWire air(Air_Pin);
+OneWire water(PIN_WATER);
+OneWire air(PIN_AIR);
 
  long get_seconds           (  int  hours, int minutes, int seconds                   );
  long get_milliseconds      (  int  hours, int minutes, int seconds, int milliseconds );
