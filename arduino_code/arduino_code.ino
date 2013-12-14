@@ -45,7 +45,7 @@ void     exec_state            ( int );  /* takes a time state */
 void     throw_exception       ( int ); /* makes necessary print for exception */
 int      get_current_state     ( void ); /* gets state from curr time */
 void     normalize_time        ( void );
-void     maybe_print_time            ( void );
+void     maybe_print_time      ( void );
 void     lcd_display_welcome   ( void );
 void     fmtDouble             ( double val, byte precision, char *buf, unsigned bufLen = 0xffff);
 unsigned fmtUnsigned           ( unsigned long val, char *buf, unsigned bufLen = 0xffff, byte width = 0);
@@ -497,20 +497,7 @@ void exec_state ( int next_state ) {
     get_temperature(PIN_WATER);
     get_temperature(PIN_AIR);
 
-    lcd.begin(16,2);
-    lcd.setCursor(0,0);
-    lcd.print("AquaGarduinoMini");
-    lcd.setCursor(0,1);
-    lcd.print("Day Begins!");
-    delay(5000);
-    lcd.clear();
-    lcd.begin(16,2);
-    lcd.setCursor(0,0);
-    lcd.print("Midnight");
-    lcd.setCursor(0,1);
-    lcd.print("Pump 2 minutes");
-    delay(2000);
-    lcd.clear();
+    lcd_display_message(':', "Midnight:Pump 2 minutes");
 
     /* set the Relay ON */
     digitalWrite(PIN_PUMP_RELAY_1, RELAY_ON);
@@ -518,7 +505,7 @@ void exec_state ( int next_state ) {
     LCDTimePump();
     /* set the Relay OFF */
     digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
-    Serial.println("00:02\n");
+
     LCDTimeLightsOFF();
     get_temperature(PIN_WATER);
     get_temperature(PIN_AIR);
@@ -527,13 +514,7 @@ void exec_state ( int next_state ) {
     get_temperature(PIN_WATER);
     get_temperature(PIN_AIR);
 
-    lcd.begin(16,2);
-    lcd.setCursor(0,0);
-    lcd.print("03:00-06:00");
-    lcd.setCursor(0,1);
-    lcd.print("Pump 2 minutes");
-    delay(2000);
-    lcd.clear();
+    lcd_display_message(':', "Pump 2 minutes:");
 
     Serial.println("03:00 :: pump 2 minutes");
     /* set the Relay ON */
@@ -553,20 +534,8 @@ void exec_state ( int next_state ) {
     get_temperature(PIN_WATER);
     get_temperature(PIN_AIR);
 
-    lcd.begin(16,2);
-    lcd.setCursor(0,0);
-    lcd.print("06:00-09:00");
-    lcd.setCursor(0,1);
-    lcd.print("Pump 2 minutes");
+    lcd_display_message(':', "Pump 2 minutes:Lights ON");
     delay(2000);
-    lcd.clear();
-    lcd.begin(16,2);
-    lcd.setCursor(0,0);
-    lcd.print("06:02-09:00");
-    lcd.setCursor(0,1);
-    lcd.print("Lights ON");
-    delay(2000);
-    lcd.clear();
 
     Serial.println("06:00 :: pump 2 minutes; Lights ON; Smile!");
     get_temperature(PIN_WATER);
@@ -577,7 +546,7 @@ void exec_state ( int next_state ) {
     LCDTimePump();
     /* set the Relay ON */
     digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
-    Serial.println("06:02");
+
     get_temperature(PIN_WATER);
     get_temperature(PIN_AIR);
     /* set the Relay On */
@@ -590,22 +559,9 @@ void exec_state ( int next_state ) {
     get_temperature(PIN_WATER);
     get_temperature(PIN_AIR);
 
-    lcd.begin(16,2);
-    lcd.setCursor(0,0);
-    lcd.print("09:00-12:00");
-    lcd.setCursor(0,1);
-    lcd.print("Pump 2 minutes");
-    delay(2000);
-    lcd.clear();
-    lcd.begin(16,2);
-    lcd.setCursor(0,0);
-    lcd.print("06:02-09:00");
-    lcd.setCursor(0,1);
-    lcd.print("Lights ON");
-    delay(2000);
-    lcd.clear();
+    lcd_display_message(':', "Pump 2 minutes:Lights ON");
 
-    Serial.println("09:00 :: pump 2 minutes; Lights ON");
+    Serial.println("09:00 :: Pump 2 minutes; Lights ON");
     get_temperature(PIN_WATER);
     get_temperature(PIN_AIR);
     /* light off */
@@ -616,7 +572,7 @@ void exec_state ( int next_state ) {
     LCDTimePump();
     /* set the Relay ON */
     digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
-    Serial.println("09:02");
+
     get_temperature(PIN_WATER);
     get_temperature(PIN_AIR);
     /* set the Relay On */
@@ -629,27 +585,7 @@ void exec_state ( int next_state ) {
     get_temperature(PIN_WATER);
     get_temperature(PIN_AIR);
 
-    lcd.begin(16,2);
-    lcd.setCursor(0,0);
-    lcd.print("12:00-12:02");
-    lcd.setCursor(0,1);
-    lcd.print("Pump 2 minutes");
-    delay(2000);
-    lcd.clear();
-    lcd.begin(16,2);
-    lcd.setCursor(0,0);
-    lcd.print("12:02-15:00");
-    lcd.setCursor(0,1);
-    lcd.print("Lights ON");
-    delay(2000);
-    lcd.clear();
-    lcd.begin(16,2);
-    lcd.setCursor(0,0);
-    lcd.print("12:02 Lunch");
-    lcd.setCursor(0,1);
-    lcd.print("Feed Fish!!");
-    delay(2000);
-    lcd.clear();
+    lcd_display_message(':', "Pump 2m; Lights:Lunch time!")
 
     Serial.println("12:00 :: pump 4 minutes; Lights ON; Feed fish: -1500 CCW, LUNCH TIME!!");
     LCDFishFeeder();
@@ -666,7 +602,7 @@ void exec_state ( int next_state ) {
     LCDTimePump();
     /* set the Relay ON */
     digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
-    Serial.println("12:02\n");
+
     get_temperature(PIN_WATER);
     get_temperature(PIN_AIR);
     /* set the light Relay On */
@@ -680,20 +616,7 @@ void exec_state ( int next_state ) {
     get_temperature(PIN_WATER);
     get_temperature(PIN_AIR);
 
-    lcd.begin(16,2);
-    lcd.setCursor(0,0);
-    lcd.print("15:00-15:02");
-    lcd.setCursor(0,1);
-    lcd.print("Pump 2 minutes");
-    delay(2000);
-    lcd.clear();
-    lcd.begin(16,2);
-    lcd.setCursor(0,0);
-    lcd.print("15:02-18:00");
-    lcd.setCursor(0,1);
-    lcd.print("Lights ON");
-    delay(2000);
-    lcd.clear();
+    lcd_display_message(':', "Pump 2 minutes:Lights ON");
 
     /* light off at 15:00 for 2 minutes while pump runs */
     digitalWrite(LightRelay_2, RELAY_OFF);
@@ -703,7 +626,7 @@ void exec_state ( int next_state ) {
     LCDTimePump();
     /* set the Relay ON */
     digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
-    Serial.println("15:02\n");
+
     /* set the Relay On */
     digitalWrite(LightRelay_2, RELAY_ON);
     get_temperature(PIN_WATER);
@@ -716,20 +639,7 @@ void exec_state ( int next_state ) {
     get_temperature(PIN_WATER);
     get_temperature(PIN_AIR);
 
-    lcd.begin(16,2);
-    lcd.setCursor(0,0);
-    lcd.print("18:00-18:02");
-    lcd.setCursor(0,1);
-    lcd.print("Pump 2 minutes");
-    delay(2000);
-    lcd.clear();
-    lcd.begin(16,2);
-    lcd.setCursor(0,0);
-    lcd.print("18:02-21:00");
-    lcd.setCursor(0,1);
-    lcd.print("Lights ON");
-    delay(2000);
-    lcd.clear();
+    lcd_display_message(':', "Pump 2 minutes: Lights ON");
 
     Serial.println("18:00 :: pump 4 minutes; Lights ON.");
     get_temperature(PIN_WATER);
@@ -742,7 +652,7 @@ void exec_state ( int next_state ) {
     LCDTimePump();
     /* set the Relay OFF */
     digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
-    Serial.println("18:02");
+
     /* set the Relay On */
     digitalWrite(LightRelay_2, RELAY_ON);
     get_temperature(PIN_WATER);
@@ -753,22 +663,9 @@ void exec_state ( int next_state ) {
     break;
   case _2100_2400_:
     get_temperature(PIN_WATER);
-    get_temperature(PIN_AIR);    
+    get_temperature(PIN_AIR);
 
-    lcd.begin(16,2);
-    lcd.setCursor(0,0);
-    lcd.print("12:00-12:02");
-    lcd.setCursor(0,1);
-    lcd.print("Pump 2 minutes");
-    delay(2000);
-    lcd.clear();
-    lcd.begin(16,2);
-    lcd.setCursor(0,0);
-    lcd.print("Midnight!!");
-    lcd.setCursor(0,1);
-    lcd.print("Party Time!!");
-    delay(2000);
-    lcd.clear();
+    lcd_display_message(':', "Mignight!:Party time!");
 
     Serial.println("21:00 :: pump 2 minutes; Lights ON.");
     get_temperature(PIN_WATER);
@@ -779,7 +676,7 @@ void exec_state ( int next_state ) {
     digitalWrite(PIN_PUMP_RELAY_1, RELAY_ON);
     /* pump 2 minutes */
     LCDTimePump();
-    Serial.println("21:02");
+
     get_temperature(PIN_WATER);
     get_temperature(PIN_AIR);
     /* set the Relay OFF */
