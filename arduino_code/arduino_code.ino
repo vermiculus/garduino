@@ -25,10 +25,14 @@
 #define _1800_2100_        7    /*      6pm to 9pm      */
 #define _2100_2400_        8    /*      9pm to midnight */
 
+#define EX_INVALID_HOUR    0
+
+#define PRINT_TIME_INTERVAL 1000
+
 /* 1-3-2-4 for proper sequencing of stepper motor FISH FEEDER  */
 Stepper FishFeedersmall_stepper(STEPS, 10, 12, 11, 13);
 
-LiquidCrystal lcd(9,8,5,4,3,2); /* LCD arduino pins set */
+LiquidCrystal lcd(9, 8, 5, 4, 3, 2); /* LCD arduino pins set */
 
 long     get_seconds           ( int, int, int );      /* h m s */
 long     get_milliseconds      ( int, int, int, int ); /* h m s m */
@@ -37,12 +41,18 @@ float    get_temperature       ( int );                /* pin */
 int      get_hour              ( unsigned long );      /* ms */
 int      get_minute            ( unsigned long );      /* ms */
 int      get_second            ( unsigned long );      /* ms */
-void     print_time            ( void );
+void     exec_state            ( int );  /* takes a time state */
+void     throw_exception       ( int ); /* makes necessary print for exception */
+int      get_current_state     ( void ); /* gets state from curr time */
+void     normalize_time        ( void );
+void     maybe_print_time            ( void );
 void     lcd_display_welcome   ( void );
 void     fmtDouble             ( double val, byte precision, char *buf, unsigned bufLen = 0xffff);
 unsigned fmtUnsigned           ( unsigned long val, char *buf, unsigned bufLen = 0xffff, byte width = 0);
 
-short state;
+int state;
+long time_offset;               /* TODO: read input from serial to normalize time */
+long previous_print_time;
 
 void setup() {
   /* Serial1.begin(38400); */
@@ -64,21 +74,37 @@ void setup() {
   delay(4000);
 }
 
+/*
+  States to control what we want to do
+  
+  1: pump out tank
+  2: run testing functions
+  3: do actual stuff
+*/
+int func = 1;
 void loop() {
   /*
     PUMP OUT TANK
     Unhook hose from back of tank and put it in a bucket.
   */
-  if(false) {
-    pumpOutTank();
-  }
-  if(false) {
+
+  maybe_print_time();
+
+  switch (func) {
+  case 1:
+    digitalWrite(PIN_PUMP_RELAY_1, RELAY_ON);
+    break;
+  case 2:
     test();
+    func = 3;
+    break;
+  case 3:
+    int next_state = get_current_state();
+    if (state != next_state) {
+      state = next_state;
+      exec_state(state);
+    }
   }
-
-  print_time();
-
-  day();
 }
 
 void test(){
@@ -88,34 +114,6 @@ void test(){
   lightTesting();
   pumpTesting();
   pumpLightTesting();
-}
-
-void day(){
-  theMidnightHour();            /* 00:00-03:00 */
-  threeToSixAM();               /* 03:00-06:00 */
-  sixToNineAM();                /* 06:00-09:00 */
-  nineToNoon();                 /* 09:00-12:00 */
-  noonToThree();                /* 12:00-15:00 */
-  threeToSixPM();               /* 15:00-18:00 */
-  sixToNinePM();                /* 18:00-21:00 */
-  nineToMidnight();             /* 21:00-00:00 */
-}
-
-void theMidnightHour(){
-  Serial.println("The Midnight Hour: 00:00 hours - pump 2 minutes: 120,000ms");
-  get_temperature(PIN_WATER);
-  get_temperature(PIN_AIR);
-  LCDtheMidnightHour();
-  /* set the Relay ON */
-  digitalWrite(PIN_PUMP_RELAY_1, RELAY_ON);
-  /* pump for 2 minutes */
-  LCDTimePump();
-  /* set the Relay OFF */
-  digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
-  Serial.println("00:02\n");
-  LCDTimeLightsOFF();
-  get_temperature(PIN_WATER);
-  get_temperature(PIN_AIR);
 }
 
 void LCDTimeLightsOFF(){
@@ -157,163 +155,6 @@ void LCDTimePump(){
   }
 }
 
-void LCDtheMidnightHour(){
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("AquaGarduinoMini");
-  lcd.setCursor(0,1);
-  lcd.print("Day Begins!");
-  delay(5000);
-  lcd.clear();
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("Midnight");
-  lcd.setCursor(0,1);
-  lcd.print("Pump 2 minutes");
-  delay(2000);
-  lcd.clear();
-}
-
-void threeToSixAM(){
-  get_temperature(PIN_WATER);
-  get_temperature(PIN_AIR);
-  LCDthreeToSixAM();
-  Serial.println("/* ---(03:00 hours - pump 2 minutes: 120,000ms)---\n");
-  /* set the Relay ON */
-  digitalWrite(PIN_PUMP_RELAY_1, RELAY_ON);
-  /* pump for 2 minutes */
-  LCDTimePump();
-  /* set the Relay OFF */
-  digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
-  Serial.println("03:02");
-  /* delay(10798000); */
-  /* delay ~3 hours */
-  LCDTimeLightsOFF();
-  get_temperature(PIN_WATER);
-  get_temperature(PIN_AIR);
-}
-
-void LCDthreeToSixAM(){
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("03:00-06:00");
-  lcd.setCursor(0,1);
-  lcd.print("Pump 2 minutes");
-  delay(2000);
-  lcd.clear();
-}
-
-void sixToNineAM(){
-  get_temperature(PIN_WATER);
-  get_temperature(PIN_AIR);
-  LCDsixToNineAM();
-  Serial.println("  /* ---(06:00 hours - pump 2 minutes: 120,000ms, Lights ON, Camera takes picture. )---\n");
-  get_temperature(PIN_WATER);
-  get_temperature(PIN_AIR);
-  /* set the Relay ON */
-  digitalWrite(PIN_PUMP_RELAY_1, RELAY_ON);
-  /* pump 2 minutes */
-  LCDTimePump();
-  /* set the Relay ON */
-  digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
-  Serial.println("06:02");
-  get_temperature(PIN_WATER);
-  get_temperature(PIN_AIR);
-  /* set the Relay On */
-  digitalWrite(LightRelay_2, RELAY_ON);
-  /* delay(10798000); */
-  /* delay ~3 hours */
-  LCDTimeLightsON();
-}
-
-void LCDsixToNineAM(){
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("06:00-09:00");
-  lcd.setCursor(0,1);
-  lcd.print("Pump 2 minutes");
-  delay(2000);
-  lcd.clear();
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("06:02-09:00");
-  lcd.setCursor(0,1);
-  lcd.print("Lights ON");
-  delay(2000);
-  lcd.clear();
-}
-
-void nineToNoon(){
-  get_temperature(PIN_WATER);
-  get_temperature(PIN_AIR);
-  LCDnineToNoon();
-  Serial.println("---(09:00 - pump 2 minutes: 120,000ms, Lights ON)---\n");
-  get_temperature(PIN_WATER);
-  get_temperature(PIN_AIR);
-  /* light off */
-  digitalWrite(LightRelay_2, RELAY_OFF);
-  /* set the Relay ON */
-  digitalWrite(PIN_PUMP_RELAY_1, RELAY_ON);
-  /* pump 2 minutes */
-  LCDTimePump();
-  /* set the Relay ON */
-  digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
-  Serial.println("09:02");
-  get_temperature(PIN_WATER);
-  get_temperature(PIN_AIR);
-  /* set the Relay On */
-  digitalWrite(LightRelay_2, RELAY_ON);
-  /* delay(10798000);  lights on for 3 hours */
-  /* delay ~3 hours */
-  LCDTimeLightsON();
-}
-
-void LCDnineToNoon(){
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("09:00-12:00");
-  lcd.setCursor(0,1);
-  lcd.print("Pump 2 minutes");
-  delay(2000);
-  lcd.clear();
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("06:02-09:00");
-  lcd.setCursor(0,1);
-  lcd.print("Lights ON");
-  delay(2000);
-  lcd.clear();
-}
-
-void noonToThree(){
-  get_temperature(PIN_WATER);
-  get_temperature(PIN_AIR);
-  LCDNoonToThree();
-  Serial.println("/* ---(12:00 hours - pump 4 minutes: 120,000ms, Lights ON, Feed fish: -1500 CCW, LUNCH TIME!!. )---\n");
-  LCDFishFeeder();
-  /* Fish Feeder */
-  FishFeedersmall_stepper.setSpeed(75);
-  /* Rotate CCW...Adjust as seems fit...must be negative (-) integer to turn Fish Feeder Counter Clock Wise */
-  /* Fish Feeder */
-  FishFeedersmall_stepper.step(-1500);
-  /* light off at 12 Noon for 2 minutes while pump runs */
-  digitalWrite(LightRelay_2, RELAY_OFF);
-  /* set the Relay ON */
-  digitalWrite(PIN_PUMP_RELAY_1, RELAY_ON);
-  /* pump 2 minutes */
-  LCDTimePump();
-  /* set the Relay ON */
-  digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
-  Serial.println("12:02\n");
-  get_temperature(PIN_WATER);
-  get_temperature(PIN_AIR);
-  /* set the light Relay On */
-  digitalWrite(LightRelay_2, RELAY_ON);
-  /* elay(10798000);  lights on for 3 hours */
-  /* delay ~3 hours */
-  LCDTimeLightsON();
-}
-
 void LCDFishFeeder(){
   lcd.begin(16,2);
   lcd.setCursor(0,0);
@@ -331,156 +172,6 @@ void LCDFishFeeder(){
   lcd.clear();
 }
 
-void LCDNoonToThree(){
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("12:00-12:02");
-  lcd.setCursor(0,1);
-  lcd.print("Pump 2 minutes");
-  delay(2000);
-  lcd.clear();
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("12:02-15:00");
-  lcd.setCursor(0,1);
-  lcd.print("Lights ON");
-  delay(2000);
-  lcd.clear();
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("12:02 Lunch");
-  lcd.setCursor(0,1);
-  lcd.print("Feed Fish!!");
-  delay(2000);
-  lcd.clear();
-}
-
-void threeToSixPM(){
-  Serial.println("  /* ---(15:00 hours - pump 2 minutes: 120,000ms, Lights ON. )---\n");
-  get_temperature(PIN_WATER);
-  get_temperature(PIN_AIR);
-  LCDthreeToSix();
-  /* light off at 15:00 for 2 minutes while pump runs */
-  digitalWrite(LightRelay_2, RELAY_OFF);
-  /* set the Relay ON */
-  digitalWrite(PIN_PUMP_RELAY_1, RELAY_ON);
-  /* pump 2 minutes */
-  LCDTimePump();
-  /* set the Relay ON */
-  digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
-  Serial.println("15:02\n");
-  /* set the Relay On */
-  digitalWrite(LightRelay_2, RELAY_ON);
-  get_temperature(PIN_WATER);
-  get_temperature(PIN_AIR);
-  /* lay(10798000);  lights on for 3 hours */
-  /* delay ~3 hours */
-  LCDTimeLightsON();
-}
-
-void LCDthreeToSix(){
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("15:00-15:02");
-  lcd.setCursor(0,1);
-  lcd.print("Pump 2 minutes");
-  delay(2000);
-  lcd.clear();
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("15:02-18:00");
-  lcd.setCursor(0,1);
-  lcd.print("Lights ON");
-  delay(2000);
-  lcd.clear();
-}
-
-void sixToNinePM(){
-  get_temperature(PIN_WATER);
-  get_temperature(PIN_AIR);
-  LCDsixToNinePM();
-  Serial.println("/* ---(18:00 hours - pump 4 minutes: 120,000ms, Lights ON. )---\n");
-  get_temperature(PIN_WATER);
-  get_temperature(PIN_AIR);
-  /* light off at 18:00 for 2 minutes while pump runs */
-  digitalWrite(LightRelay_2, RELAY_OFF);
-  /* set the Relay ON */
-  digitalWrite(PIN_PUMP_RELAY_1, RELAY_ON);
-  /* pump 2 minutes */
-  LCDTimePump();
-  /* set the Relay OFF */
-  digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
-  Serial.println("18:02");
-  /* set the Relay On */
-  digitalWrite(LightRelay_2, RELAY_ON);
-  get_temperature(PIN_WATER);
-  get_temperature(PIN_AIR);
-  /* elay(10798000);  lights on for 3 hours */
-  /* delay ~3 hours */
-  LCDTimeLightsON();
-}
-
-void LCDsixToNinePM(){
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("18:00-18:02");
-  lcd.setCursor(0,1);
-  lcd.print("Pump 2 minutes");
-  delay(2000);
-  lcd.clear();
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("18:02-21:00");
-  lcd.setCursor(0,1);
-  lcd.print("Lights ON");
-  delay(2000);
-  lcd.clear();
-}
-
-void nineToMidnight(){
-  get_temperature(PIN_WATER);
-  get_temperature(PIN_AIR);
-  LCDnineToMidnight();
-  Serial.println("  /* ---(21:00 hours - pump 2 minutes: 120,000ms, Lights ON. Lights OFF at 00:00)---\n");
-  get_temperature(PIN_WATER);
-  get_temperature(PIN_AIR);
-  /* light off */
-  digitalWrite(LightRelay_2, RELAY_OFF);
-  /* set the Relay ON */
-  digitalWrite(PIN_PUMP_RELAY_1, RELAY_ON);
-  /* pump 2 minutes */
-  LCDTimePump();
-  Serial.println("21:02");
-  get_temperature(PIN_WATER);
-  get_temperature(PIN_AIR);
-  /* set the Relay OFF */
-  digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
-  /* set the Relay ON */
-  digitalWrite(LightRelay_2, RELAY_ON);
-  /* lay(10798000); lights on for 3 hours */
-  /* delay ~3 hours */
-  LCDTimeLightsON();
-  /* ---(00:00 hours - Lights OFF. )--- */
-  /* set the Relay OFF */
-  digitalWrite(LightRelay_2, RELAY_OFF);
-}
-
-void LCDnineToMidnight(){
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("12:00-12:02");
-  lcd.setCursor(0,1);
-  lcd.print("Pump 2 minutes");
-  delay(2000);
-  lcd.clear();
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("Midnight!!");
-  lcd.setCursor(0,1);
-  lcd.print("Party Time!!");
-  delay(2000);
-  lcd.clear();
-}
 /* prints to LCD */
 void LCDTesting(){
   lcd.begin(16,2);
@@ -634,13 +325,6 @@ void pumpLightTesting(){
   delay(2500);
 }
 
-void pumpOutTank(){
-  /* set the Relay On */
-  digitalWrite(PIN_PUMP_RELAY_1, RELAY_ON);
-  /* pump 10 minutes; pump out tank */
-  delay(600000000);
-}
-
 /* Output Routines */
 
 /* Prints a two-line `message` to the LCD screen using a line
@@ -752,11 +436,11 @@ float get_temperature ( int pin ) {
 /* Utility Functions */
 
 char *get_spaces(int n) {
-  return (char*)malloc(n*sizeof(char));
+  return (char*) malloc(n * sizeof(char));
 }
 
 long get_seconds(int h, int m, int s) {
-  return (h*60+m)*60+s;
+  return (h * 60 + m) * 60 + s;
 }
 
 long get_milliseconds(int h, int m, int s, int ms) {
@@ -767,15 +451,383 @@ int get_hour   ( unsigned long m ) { return m / 1000 * 60 * 60 ; }
 int get_minute ( unsigned long m ) { return m / 1000 * 60      ; }
 int get_second ( unsigned long m ) { return m / 1000           ; }
 
-void print_time( void ) {
-  unsigned long m = millis();
-  Serial.print(get_hour  (m)); Serial.print(':');
-  Serial.print(get_minute(m)); Serial.print(':');
-  Serial.print(get_second(m)); Serial.print(':');
-  Serial.print(m);
+void maybe_print_time( void ) {
+  long current_time = millis();
+  current_time += time_offset;
+  long delta = current_time - previous_time;
+
+  /* Print current time every PRINT_TIME_INTERVAL ms */
+  if (delta > PRINT_TIME_INTERVAL) {
+    previous_time = current_time;
+    Serial.print(get_hour  ( current_time )); Serial.print(':');
+    Serial.print(get_minute( current_time )); Serial.print(':');
+    Serial.print(get_second( current_time )); Serial.print(':');
+    Serial.print(m);
+  }
 }
 
+/* Calculates the current time according to the current offset and
+   then returns the current state */
+int get_current_state( void ) {
+  long current_time = millis();
+  current_time += time_offset;
+
+  int current_hour = get_hour(current_time);
+
+  switch (current_hour) {
+  case  0: case  1: case  2: return _0000_0300_;
+  case  3: case  4: case  5: return _0300_0600_;
+  case  6: case  7: case  8: return _0600_0900_;
+  case  9: case 10: case 11: return _0900_1200_;
+  case 12: case 13: case 14: return _1200_1500_;
+  case 15: case 16: case 17: return _1500_1800_;
+  case 18: case 19: case 20: return _1800_2100_;
+  case 21: case 22: case 23: return _2100_2400_;
+  default:
+    throw_exception(EX_INVALID_HOUR);
+    return -1;
+  }
+}
+
+/* TODO */
+void exec_state ( int next_state ) {
+  switch (next_state) {
+  case _0000_0300_:
+    Serial.println("00:00 :: pump 2 minutes");
+    get_temperature(PIN_WATER);
+    get_temperature(PIN_AIR);
+
+    lcd.begin(16,2);
+    lcd.setCursor(0,0);
+    lcd.print("AquaGarduinoMini");
+    lcd.setCursor(0,1);
+    lcd.print("Day Begins!");
+    delay(5000);
+    lcd.clear();
+    lcd.begin(16,2);
+    lcd.setCursor(0,0);
+    lcd.print("Midnight");
+    lcd.setCursor(0,1);
+    lcd.print("Pump 2 minutes");
+    delay(2000);
+    lcd.clear();
+
+    /* set the Relay ON */
+    digitalWrite(PIN_PUMP_RELAY_1, RELAY_ON);
+    /* pump for 2 minutes */
+    LCDTimePump();
+    /* set the Relay OFF */
+    digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
+    Serial.println("00:02\n");
+    LCDTimeLightsOFF();
+    get_temperature(PIN_WATER);
+    get_temperature(PIN_AIR);
+    break;
+  case _0300_0600_:
+    get_temperature(PIN_WATER);
+    get_temperature(PIN_AIR);
+
+    lcd.begin(16,2);
+    lcd.setCursor(0,0);
+    lcd.print("03:00-06:00");
+    lcd.setCursor(0,1);
+    lcd.print("Pump 2 minutes");
+    delay(2000);
+    lcd.clear();
+
+    Serial.println("03:00 :: pump 2 minutes");
+    /* set the Relay ON */
+    digitalWrite(PIN_PUMP_RELAY_1, RELAY_ON);
+    /* pump for 2 minutes */
+    LCDTimePump();
+    /* set the Relay OFF */
+    digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
+    Serial.println("03:02");
+    /* delay(10798000); */
+    /* delay ~3 hours */
+    LCDTimeLightsOFF();
+    get_temperature(PIN_WATER);
+    get_temperature(PIN_AIR);
+    break;
+  case _0600_0900_:
+    get_temperature(PIN_WATER);
+    get_temperature(PIN_AIR);
+
+    lcd.begin(16,2);
+    lcd.setCursor(0,0);
+    lcd.print("06:00-09:00");
+    lcd.setCursor(0,1);
+    lcd.print("Pump 2 minutes");
+    delay(2000);
+    lcd.clear();
+    lcd.begin(16,2);
+    lcd.setCursor(0,0);
+    lcd.print("06:02-09:00");
+    lcd.setCursor(0,1);
+    lcd.print("Lights ON");
+    delay(2000);
+    lcd.clear();
+
+    Serial.println("06:00 :: pump 2 minutes; Lights ON; Smile!");
+    get_temperature(PIN_WATER);
+    get_temperature(PIN_AIR);
+    /* set the Relay ON */
+    digitalWrite(PIN_PUMP_RELAY_1, RELAY_ON);
+    /* pump 2 minutes */
+    LCDTimePump();
+    /* set the Relay ON */
+    digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
+    Serial.println("06:02");
+    get_temperature(PIN_WATER);
+    get_temperature(PIN_AIR);
+    /* set the Relay On */
+    digitalWrite(LightRelay_2, RELAY_ON);
+    /* delay(10798000); */
+    /* delay ~3 hours */
+    LCDTimeLightsON();
+    break;
+  case _0900_1200_:
+    get_temperature(PIN_WATER);
+    get_temperature(PIN_AIR);
+
+    lcd.begin(16,2);
+    lcd.setCursor(0,0);
+    lcd.print("09:00-12:00");
+    lcd.setCursor(0,1);
+    lcd.print("Pump 2 minutes");
+    delay(2000);
+    lcd.clear();
+    lcd.begin(16,2);
+    lcd.setCursor(0,0);
+    lcd.print("06:02-09:00");
+    lcd.setCursor(0,1);
+    lcd.print("Lights ON");
+    delay(2000);
+    lcd.clear();
+
+    Serial.println("09:00 :: pump 2 minutes; Lights ON");
+    get_temperature(PIN_WATER);
+    get_temperature(PIN_AIR);
+    /* light off */
+    digitalWrite(LightRelay_2, RELAY_OFF);
+    /* set the Relay ON */
+    digitalWrite(PIN_PUMP_RELAY_1, RELAY_ON);
+    /* pump 2 minutes */
+    LCDTimePump();
+    /* set the Relay ON */
+    digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
+    Serial.println("09:02");
+    get_temperature(PIN_WATER);
+    get_temperature(PIN_AIR);
+    /* set the Relay On */
+    digitalWrite(LightRelay_2, RELAY_ON);
+    /* delay(10798000);  lights on for 3 hours */
+    /* delay ~3 hours */
+    LCDTimeLightsON();
+    break;
+  case _1200_1500_:
+    get_temperature(PIN_WATER);
+    get_temperature(PIN_AIR);
+
+    lcd.begin(16,2);
+    lcd.setCursor(0,0);
+    lcd.print("12:00-12:02");
+    lcd.setCursor(0,1);
+    lcd.print("Pump 2 minutes");
+    delay(2000);
+    lcd.clear();
+    lcd.begin(16,2);
+    lcd.setCursor(0,0);
+    lcd.print("12:02-15:00");
+    lcd.setCursor(0,1);
+    lcd.print("Lights ON");
+    delay(2000);
+    lcd.clear();
+    lcd.begin(16,2);
+    lcd.setCursor(0,0);
+    lcd.print("12:02 Lunch");
+    lcd.setCursor(0,1);
+    lcd.print("Feed Fish!!");
+    delay(2000);
+    lcd.clear();
+
+    Serial.println("12:00 :: pump 4 minutes; Lights ON; Feed fish: -1500 CCW, LUNCH TIME!!");
+    LCDFishFeeder();
+    /* Fish Feeder */
+    FishFeedersmall_stepper.setSpeed(75);
+    /* Rotate CCW...Adjust as seems fit...must be negative (-) integer to turn Fish Feeder Counter Clock Wise */
+    /* Fish Feeder */
+    FishFeedersmall_stepper.step(-1500);
+    /* light off at 12 Noon for 2 minutes while pump runs */
+    digitalWrite(LightRelay_2, RELAY_OFF);
+    /* set the Relay ON */
+    digitalWrite(PIN_PUMP_RELAY_1, RELAY_ON);
+    /* pump 2 minutes */
+    LCDTimePump();
+    /* set the Relay ON */
+    digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
+    Serial.println("12:02\n");
+    get_temperature(PIN_WATER);
+    get_temperature(PIN_AIR);
+    /* set the light Relay On */
+    digitalWrite(LightRelay_2, RELAY_ON);
+    /* elay(10798000);  lights on for 3 hours */
+    /* delay ~3 hours */
+    LCDTimeLightsON();
+    break;
+  case _1500_1800_:
+    Serial.println("15:00 :: pump 2 minutes; Lights ON.");
+    get_temperature(PIN_WATER);
+    get_temperature(PIN_AIR);
+
+    lcd.begin(16,2);
+    lcd.setCursor(0,0);
+    lcd.print("15:00-15:02");
+    lcd.setCursor(0,1);
+    lcd.print("Pump 2 minutes");
+    delay(2000);
+    lcd.clear();
+    lcd.begin(16,2);
+    lcd.setCursor(0,0);
+    lcd.print("15:02-18:00");
+    lcd.setCursor(0,1);
+    lcd.print("Lights ON");
+    delay(2000);
+    lcd.clear();
+
+    /* light off at 15:00 for 2 minutes while pump runs */
+    digitalWrite(LightRelay_2, RELAY_OFF);
+    /* set the Relay ON */
+    digitalWrite(PIN_PUMP_RELAY_1, RELAY_ON);
+    /* pump 2 minutes */
+    LCDTimePump();
+    /* set the Relay ON */
+    digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
+    Serial.println("15:02\n");
+    /* set the Relay On */
+    digitalWrite(LightRelay_2, RELAY_ON);
+    get_temperature(PIN_WATER);
+    get_temperature(PIN_AIR);
+    /* lay(10798000);  lights on for 3 hours */
+    /* delay ~3 hours */
+    LCDTimeLightsON();
+    break;
+  case _1800_2100_:
+    get_temperature(PIN_WATER);
+    get_temperature(PIN_AIR);
+
+    lcd.begin(16,2);
+    lcd.setCursor(0,0);
+    lcd.print("18:00-18:02");
+    lcd.setCursor(0,1);
+    lcd.print("Pump 2 minutes");
+    delay(2000);
+    lcd.clear();
+    lcd.begin(16,2);
+    lcd.setCursor(0,0);
+    lcd.print("18:02-21:00");
+    lcd.setCursor(0,1);
+    lcd.print("Lights ON");
+    delay(2000);
+    lcd.clear();
+
+    Serial.println("18:00 :: pump 4 minutes; Lights ON.");
+    get_temperature(PIN_WATER);
+    get_temperature(PIN_AIR);
+    /* light off at 18:00 for 2 minutes while pump runs */
+    digitalWrite(LightRelay_2, RELAY_OFF);
+    /* set the Relay ON */
+    digitalWrite(PIN_PUMP_RELAY_1, RELAY_ON);
+    /* pump 2 minutes */
+    LCDTimePump();
+    /* set the Relay OFF */
+    digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
+    Serial.println("18:02");
+    /* set the Relay On */
+    digitalWrite(LightRelay_2, RELAY_ON);
+    get_temperature(PIN_WATER);
+    get_temperature(PIN_AIR);
+    /* elay(10798000);  lights on for 3 hours */
+    /* delay ~3 hours */
+    LCDTimeLightsON();
+    break;
+  case _2100_2400_:
+    get_temperature(PIN_WATER);
+    get_temperature(PIN_AIR);    
+
+    lcd.begin(16,2);
+    lcd.setCursor(0,0);
+    lcd.print("12:00-12:02");
+    lcd.setCursor(0,1);
+    lcd.print("Pump 2 minutes");
+    delay(2000);
+    lcd.clear();
+    lcd.begin(16,2);
+    lcd.setCursor(0,0);
+    lcd.print("Midnight!!");
+    lcd.setCursor(0,1);
+    lcd.print("Party Time!!");
+    delay(2000);
+    lcd.clear();
+
+    Serial.println("21:00 :: pump 2 minutes; Lights ON.");
+    get_temperature(PIN_WATER);
+    get_temperature(PIN_AIR);
+    /* light off */
+    digitalWrite(LightRelay_2, RELAY_OFF);
+    /* set the Relay ON */
+    digitalWrite(PIN_PUMP_RELAY_1, RELAY_ON);
+    /* pump 2 minutes */
+    LCDTimePump();
+    Serial.println("21:02");
+    get_temperature(PIN_WATER);
+    get_temperature(PIN_AIR);
+    /* set the Relay OFF */
+    digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
+    /* set the Relay ON */
+    digitalWrite(LightRelay_2, RELAY_ON);
+    /* lay(10798000); lights on for 3 hours */
+    /* delay ~3 hours */
+    LCDTimeLightsON();
+    /* ---(00:00 hours - Lights OFF. )--- */
+    /* set the Relay OFF */
+    digitalWrite(LightRelay_2, RELAY_OFF);
+    break;
+  }
+}
+
+/* TODO */
+/* Read formatted data from serial */
+void normalize_time ( void ) {
+  /*
+    Read formatted data from serial and parse it.
+    
+    Probably should go ISO:
+
+        THH:MM:SS.S
+
+    The T marks the beginning of a time
+ */
+}
+
+void throw_exception( int exception ) {
+  if (exception) {
+    Serial.println("An error has occurred!");
+    switch (exception) {
+    case EX_INVALID_HOUR:
+      Serial.println("Invalid Hour!");
+      break;
+    default:
+      Serial.println("Too bad we don't know what it is!");
+    }
+  }
+}
+
+/* `Borrowed' Functions :: Printing Floating-Point Numbers */
+
 /*
+  From http://forum.arduino.cc/index.php/topic,44216.0.html#11
+  
   Format a floating point value with number of decimal places.  The
   `precision` parameter is a number from 0 to 6 indicating the desired
   decimal places.  The `buf` parameter points to a buffer to receive
@@ -886,4 +938,5 @@ unsigned fmtUnsigned(unsigned long val, char *buf, unsigned bufLen, byte width) 
 
 /* Local Variables: */
 /* indent-tabs-mode: nil */
+/* truncate-lines: t */
 /* End: */
