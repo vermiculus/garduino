@@ -45,7 +45,7 @@ float    get_temperature       ( int );                /* pin */
 int      get_hour              ( unsigned long );      /* ms */
 int      get_minute            ( unsigned long );      /* ms */
 int      get_second            ( unsigned long );      /* ms */
-int      delay_time            ( int, int, int, int ); /* h m s ms */
+void     delay_for_time        ( int, int, int, int ); /* h m s ms */
 void     set_light             ( int );
 void     set_pump              ( int );
 void     feed_fish             ( void );
@@ -63,6 +63,7 @@ int light_state;
 int time_state;
 long time_offset;               /* TODO: read input from serial to normalize time */
 long previous_print_time;
+long previous_time;
 
 void setup() {
   /* Serial1.begin(38400); */
@@ -81,12 +82,12 @@ void setup() {
   lcd_display_welcome();
 
   /* Ensure that all relays are inactive at Reset */
-  delay_time(0,0,4,0);
+  delay_for_time(0,0,4,0);
 }
 
 /*
   States to control what we want to do
-  
+
   1: pump out tank
   2: run testing functions
   3: do actual stuff
@@ -123,7 +124,7 @@ void test(){
 
   feed_fish(1500);
   set_light(RELAY_ON);
-  delay_time(0,0,2,0);
+  delay_for_time(0,0,2,0);
   set_light(RELAY_OFF);
   pump_water(2);
 }
@@ -137,23 +138,23 @@ void set_light (int new_state) {
 void pump_water (int seconds) {
   int old_light = digitalRead(LightRelay_2);
   digitalWrite(LightRelay_2, RELAY_OFF);
-  delay_time(0, 0, 0, 500);
+  delay_for_time(0, 0, 0, 500);
 
   digitalWrite(PIN_PUMP_RELAY_1, RELAY_ON);
-  delay_time(0, 0, seconds, 0);
+  delay_for_time(0, 0, seconds, 0);
   digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
 
-  delay_time(0, 0, 0, 500);
+  delay_for_time(0, 0, 0, 500);
   digitalWrite(LightRelay_2, old_light);
 }
 void feed_fish ( int amount ) {
   FishFeedersmall_stepper.setSpeed(75);
 
   digitalWrite(LightRelay_2, RELAY_OFF);
-  delay_time(0,0,1,0);
-  
-  FishFeedersmall_stepper.set(-amount);
-  delay_time(0,2,0,0);
+  delay_for_time(0,0,1,0);
+
+  FishFeedersmall_stepper.step(-amount);
+  delay_for_time(0,2,0,0);
 }
 
 /* Output Routines */
@@ -206,15 +207,14 @@ void lcd_display_message(char delim, char *message) {
 }
 
 void lcd_display_welcome() {
-  const long DELAY_TIME = get_seconds(0, 0, 5);
   lcd_display_message(':', "Sean:Allred");
-  delay(DELAY_TIME);
+  delay_for_time(0, 0, 5, 0);
   lcd_display_message(':', "Libby:Glasgow");
-  delay(DELAY_TIME);
+  delay_for_time(0, 0, 5, 0);
   lcd_display_message(':', "Mary Claire:McCarthy");
-  delay(DELAY_TIME);
+  delay_for_time(0, 0, 5, 0);
   lcd_display_message(':', "Alexia:Tanski");
-  delay(DELAY_TIME);
+  delay_for_time(0, 0, 5, 0);
   lcd_display_message(':', "James:Sappington");
 }
 
@@ -277,7 +277,7 @@ long get_milliseconds(int h, int m, int s, int ms) {
   return get_seconds(h, m, s) * 1000 + ms;
 }
 
-void delay_time(int h, int m, int s, int ms) {
+void delay_for_time(int h, int m, int s, int ms) {
   delay(get_milliseconds(h, m, s, ms));
 }
 
@@ -289,18 +289,18 @@ void maybe_print_time( void ) {
   long current_time = millis();
   current_time += time_offset;
   long delta = current_time - previous_time;
-  
+
   /* Print current time every PRINT_TIME_INTERVAL ms */
   if (delta > PRINT_TIME_INTERVAL) {
     previous_time = current_time;
     Serial.print(get_hour  ( current_time )); Serial.print(':');
     Serial.print(get_minute( current_time )); Serial.print(':');
     Serial.print(get_second( current_time )); Serial.print(':');
-    Serial.println(m);
+    Serial.println(current_time);
 
     Serial.print("!");
-    air_temp = (char*) malloc(32*sizeof(char));
-    water_temp = (char*) malloc(32*sizeof(char));
+    char *air_temp = (char*) malloc(32*sizeof(char));
+    char *water_temp = (char*) malloc(32*sizeof(char));
     fmtDouble(get_temperature(PIN_AIR), 2, air_temp);
     fmtDouble(get_temperature(PIN_AIR), 2, water_temp);
     Serial.print(air_temp);
@@ -333,10 +333,10 @@ int get_current_state( void ) {
 }
 
 void exec_state ( int next_state ) {
-  if (state == next_state) {
+  if (time_state == next_state) {
     return;
   }
-  
+
   switch (next_state) {
   case STATE_0000_0300:
     Serial.println("00:00 :: pump 2 minutes");
@@ -344,7 +344,7 @@ void exec_state ( int next_state ) {
     lcd_display_message(':', "Midnight:Pump 2 minutes");
 
     pump_water(120);
-    
+
     set_light(RELAY_OFF);
     break;
   case STATE_0300_0600:
@@ -357,7 +357,6 @@ void exec_state ( int next_state ) {
     break;
   case STATE_0600_0900:
     lcd_display_message(':', "Pump 2 minutes:Lights ON");
-    delay_time(0,0,2,0);
 
     Serial.println("06:00 :: pump 2 minutes; Lights ON; Smile!");
 
@@ -373,11 +372,10 @@ void exec_state ( int next_state ) {
     set_light(RELAY_ON);
     break;
   case STATE_1200_1500:
-    lcd_display_message(':', "Pump 2m; Lights:Lunch time!")
+    lcd_display_message(':', "Pump 2m; Lights:Lunch time!");
 
     Serial.println("12:00 :: pump 4 minutes; Lights ON; "
                    "Feed fish: -1500 CCW, LUNCH TIME!!");
-    LCDFishFeeder();
 
     feed_fish(1500);
     pump_water(120);
@@ -402,7 +400,7 @@ void exec_state ( int next_state ) {
     Serial.println("21:00 :: pump 2 minutes; Lights ON.");
 
     pump_water(120);
-    set_lights(RELAY_OFF);
+    set_light(RELAY_OFF);
     break;
   }
 }
@@ -412,7 +410,7 @@ void exec_state ( int next_state ) {
 void normalize_time ( void ) {
   /*
     Read formatted data from serial and parse it.
-    
+
     Probably should go ISO:
 
         THH:MM:SS.S
@@ -438,7 +436,7 @@ void throw_exception( int exception ) {
 
 /*
   From http://forum.arduino.cc/index.php/topic,44216.0.html#11
-  
+
   Format a floating point value with number of decimal places.  The
   `precision` parameter is a number from 0 to 6 indicating the desired
   decimal places.  The `buf` parameter points to a buffer to receive
@@ -446,7 +444,7 @@ void throw_exception( int exception ) {
   the resulting string.  The buffer's length may be optionally
   specified.  If it is given, the maximum length of the generated
   string will be one less than the specified value.
-  
+
   example:
 
       fmtDouble(3.1415, 2, buf);
@@ -457,7 +455,7 @@ void fmtDouble(double val, byte precision, char *buf, unsigned bufLen) {
   if (!buf || !bufLen) {
     return;
   }
-  
+
   /* limit the precision to the maximum allowed value */
   const byte maxPrecision = 6;
   if (precision > maxPrecision) {
