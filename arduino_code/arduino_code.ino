@@ -4,9 +4,6 @@
 #include <OneWire.h>            /* DS18S20 Temperature */
 #include <Stepper.h>            /* FISH FEEDER */
 
-// TODO: define a function PrintLCD(*char, long) that splits at newline (guaranteeing width) and pauses
-// TODO: To avoid using delay() everywhere, use millis(): http://arduino.cc/en/Tutorial/BlinkWithoutDelay
-
 #define STEPS            100 /* Number of steps per revolution stepper motor FISH FEEDER */
 #define STEPPER_SPEED    200
 #define RELAY_ON           0 /* relay on */
@@ -123,10 +120,12 @@ void loop() {
 void test(){
   /* for normal serial communication */
   Serial.begin (38400);
-  fishFeederTest();
-  lightTesting();
-  pumpTesting();
-  pumpLightTesting();
+
+  feed_fish(1500);
+  set_light(RELAY_ON);
+  delay_time(0,0,2,0);
+  set_light(RELAY_OFF);
+  pump_water(2);
 }
 
 void set_light (int new_state) {
@@ -155,215 +154,6 @@ void feed_fish ( int amount ) {
   
   FishFeedersmall_stepper.set(-amount);
   delay_time(0,2,0,0);
-}
-
-void LCDTimeLightsOFF(){
-  for(int i = get_seconds(2, 59, 50) ; i>=0 ; i--) {
-    Serial.println("#");
-    lcd.begin(16,2);
-    lcd.setCursor(0,0);
-    lcd.print("Lights OFF...");
-    lcd.setCursor(0,1);
-    lcd.print(i);
-    delay(1000);
-    lcd.clear();
-  }
-}
-
-void LCDTimeLightsON(){
-  for(int i = get_seconds(2, 59, 50);i>=0;i--){
-    Serial.println("*");
-    lcd.begin(16,2);
-    lcd.setCursor(0,0);
-    lcd.print("Lights ON...");
-    lcd.setCursor(0,1);
-    lcd.print(i);
-    delay(1000);
-    lcd.clear();
-  }
-}
-
-void LCDTimePump(){
-  for(int i = get_seconds(0, 2, 0); i >= 0; i--) {
-    Serial.println("$");
-    lcd.begin(16,2);
-    lcd.setCursor(0,0);
-    lcd.print("Pump ON...");
-    lcd.setCursor(0,1);
-    lcd.print(i);
-    delay(1000);
-    lcd.clear();
-  }
-}
-
-void LCDFishFeeder(){
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("Lunch time!!");
-  lcd.setCursor(0,1);
-  lcd.print("Stepper Motor");
-  delay(2000);
-  lcd.clear();
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("Takes -1500 CCW");
-  lcd.setCursor(0,1);
-  lcd.print("at speed 75");
-  delay(2000);
-  lcd.clear();
-}
-
-/* prints to LCD */
-void LCDTesting(){
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("Testing, testing.");
-  lcd.setCursor(0,1);
-  lcd.print("Unit testing");
-  delay(2000);
-  lcd.clear();
-}
-/* prints to LCD */
-void LCDFishFeederTestON(){
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("Feeder Stepper.");
-  lcd.setCursor(0,1);
-  lcd.print("Motor testing");
-  delay(2000);
-  lcd.clear();
-}
-/* prints to LCD */
-void LCDFishFeederTestOFF(){
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("-100 steps CCW");
-  lcd.setCursor(0,1);
-  lcd.print("100 steps CW");
-  delay(2000);
-  lcd.clear();
-}
-/* prints to LCD */
-void LCDLightTestON(){
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("Lights ON");
-  lcd.setCursor(0,1);
-  lcd.print("2.5 seconds");
-  delay(2000);
-  lcd.clear();
-}
-/* prints to LCD */
-void LCDLightTestOFF(){
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("Lights OFF");
-  lcd.setCursor(0,1);
-  lcd.print("2.5 seconds");
-  delay(2000);
-  lcd.clear();
-}
-/* prints to LCD */
-void LCDPumpTestON(){
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("Pump ON");
-  lcd.setCursor(0,1);
-  lcd.print("2.5 seconds");
-  delay(2000);
-  lcd.clear();
-}
-/* prints to LCD */
-void LCDPumpTestOFF(){
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("Pump OFF");
-  lcd.setCursor(0,1);
-  lcd.print("2.5 seconds");
-  delay(2000);
-  lcd.clear();
-}
-/* prints to LCD */
-void LCDLightsPumpTestON(){
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("Lights on 120V");
-  lcd.setCursor(0,1);
-  lcd.print("Pump on 5V");
-  delay(2000);
-  lcd.clear();
-}
-/* prints to LCD */
-void LCDLightsPumpTestOFF(){
-  lcd.begin(16,2);
-  lcd.setCursor(0,0);
-  lcd.print("Pump R_1 OFF");
-  lcd.setCursor(0,1);
-  lcd.print("Lights R_2 OFF");
-  delay(2000);
-  lcd.clear();
-}
-/* tests for fish feeder pins 10-12-11-13 */
-void fishFeederTest(){
-  LCDTesting();
-  LCDFishFeederTestON();
-  Serial.println("Testing, testing.\n");
-  FishFeedersmall_stepper.setSpeed(75);
-  /* Rotate CCW */
-  FishFeedersmall_stepper.step(-100);
-  Serial.println("Fish Feeder takes -100 steps Counter Clock Wise.\n");
-  delay(2500);
-  FishFeedersmall_stepper.setSpeed(75);
-  /* Rotate CW */
-  FishFeedersmall_stepper.step(100);
-  LCDFishFeederTestOFF();
-  Serial.println("Fish Feeder takes 100 steps Clock Wise.\n");
-  delay(2500);
-}
-/* tests lights */
-void lightTesting(){
-  LCDLightTestON();
-  /* set the Relay On */
-  digitalWrite(LightRelay_2, RELAY_ON);
-  Serial.println("Lights ON for 2.5 seconds.\n");
-  delay(2500);
-  lcd.begin(16,2);
-  LCDLightTestOFF();
-  /* set the Relay On */
-  digitalWrite(LightRelay_2, RELAY_OFF);
-  Serial.println("Lights OFF.\n");
-  delay(2500);
-}
-/* tests pump */
-void pumpTesting(){
-  LCDPumpTestON();
-  /* set the Relay ON */
-  digitalWrite(PIN_PUMP_RELAY_1, RELAY_ON);
-  Serial.println("Pump ON for 2.5 seconds.\n");
-  delay(2500);
-  lcd.begin(16,2);
-  /* set the Relay OFF */
-  digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
-  Serial.println("Pump OFF.\n");
-  LCDPumpTestOFF();
-  delay(2500);
-}
-
-void pumpLightTesting(){
-  LCDLightsPumpTestON();
-  /* set the Relay ON */
-  digitalWrite(LightRelay_2, RELAY_ON);
-  /* set the Relay ON */
-  digitalWrite(PIN_PUMP_RELAY_1, RELAY_ON);
-  Serial.println("Pump and Light ON together for 5 seconds.\n");
-  delay(5000);
-  /* set the Relay OFF */
-  digitalWrite(LightRelay_2, RELAY_OFF);
-  /* set the Relay OFF */
-  digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
-  Serial.println("Pump and Light OFF.\n");
-  LCDLightsPumpTestOFF();
-  delay(2500);
 }
 
 /* Output Routines */
@@ -470,7 +260,6 @@ float get_temperature ( int pin ) {
   /* using two's complement */
   float tempRead = ((MSB << 8)| LSB);
   temperature = tempRead / 16;
-  /* get_temperature(PIN_WATER); */
   return temperature;
 }
 
@@ -489,7 +278,7 @@ long get_milliseconds(int h, int m, int s, int ms) {
 }
 
 void delay_time(int h, int m, int s, int ms) {
-  delay(get_milliseconds(h, m, s, ms);
+  delay(get_milliseconds(h, m, s, ms));
 }
 
 int get_hour   ( unsigned long m ) { return m / 1000 * 60 * 60 ; }
@@ -500,14 +289,23 @@ void maybe_print_time( void ) {
   long current_time = millis();
   current_time += time_offset;
   long delta = current_time - previous_time;
-
+  
   /* Print current time every PRINT_TIME_INTERVAL ms */
   if (delta > PRINT_TIME_INTERVAL) {
     previous_time = current_time;
     Serial.print(get_hour  ( current_time )); Serial.print(':');
     Serial.print(get_minute( current_time )); Serial.print(':');
     Serial.print(get_second( current_time )); Serial.print(':');
-    Serial.print(m);
+    Serial.println(m);
+
+    Serial.print("!");
+    air_temp = (char*) malloc(32*sizeof(char));
+    water_temp = (char*) malloc(32*sizeof(char));
+    fmtDouble(get_temperature(PIN_AIR), 2, air_temp);
+    fmtDouble(get_temperature(PIN_AIR), 2, water_temp);
+    Serial.print(air_temp);
+    Serial.print(water_temp);
+    Serial.println();
   }
 }
 
@@ -534,10 +332,7 @@ int get_current_state( void ) {
   }
 }
 
-/* TODO */
 void exec_state ( int next_state ) {
-  get_temperature(PIN_WATER);
-  get_temperature(PIN_AIR);
   if (state == next_state) {
     return;
   }
