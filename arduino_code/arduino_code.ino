@@ -9,7 +9,7 @@
 #define RELAY_ON           0 /* relay on */
 #define RELAY_OFF          1 /* relay off */
 #define PIN_PUMP_RELAY_1  22 /* Arduino Digital I/O pin number pump */
-#define LightRelay_2      24 /* Arduino Digital I/O pin number lights */
+#define PIN_LIGHT_RELAY_2      24 /* Arduino Digital I/O pin number lights */
 #define PIN_WATER          7 /* DS18S20 Signal pin on digital 7 */
 #define PIN_AIR            6 /* DS18S20 Signal pin on digital 6 */
 
@@ -47,7 +47,7 @@ int      get_minute            ( unsigned long );      /* ms */
 int      get_second            ( unsigned long );      /* ms */
 void     delay_for_time        ( int, int, int, int ); /* h m s ms */
 void     set_light             ( int );
-void     pump_water              ( int );
+void     pump_water            ( int );
 void     feed_fish             ( void );
 void     exec_state            ( int );  /* takes a time state */
 void     throw_exception       ( int ); /* makes necessary print for exception */
@@ -67,17 +67,18 @@ long previous_time;
 
 void setup() {
   pinMode(PIN_PUMP_RELAY_1, OUTPUT);
-  pinMode(LightRelay_2    , OUTPUT);
+  pinMode(PIN_LIGHT_RELAY_2, OUTPUT);
 
-  lcd.begin(16, 2);
   Serial.begin(9600);
+  Serial.println("Pausing for Raspberry Pi");
+  delay_for_time(0,0,5,0);
 
   /* set the speed of the stepper motor */
   FishFeedersmall_stepper.setSpeed(STEPPER_SPEED);
 
   digitalWrite(PIN_PUMP_RELAY_1, RELAY_OFF);
-  light_state = RELAY_ON;
-  //digitalWrite(LightRelay_2    , RELAY_OFF);
+  light_state = RELAY_OFF;
+  digitalWrite(PIN_LIGHT_RELAY_2, RELAY_OFF);
 
   /* calls welcome message with names */
   lcd_display_welcome(2);
@@ -135,6 +136,13 @@ void test(){
   delay_for_time(0,0,2,0);
   set_light(RELAY_ON);
   
+  lcd_display_message(':', "Testing: FP!");
+  delay_for_time(0,0,2,0);
+  char *s = "pi=:     ";
+  fmtDouble(3.14159f, 3, s+4);
+  lcd_display_message(':', s);
+  delay_for_time(0,0,2,0);
+  
   
   lcd_display_message(':', "Testing: pump!");
   pump_water(2);
@@ -148,11 +156,11 @@ void set_light (int new_state) {
   Serial.println(new_state == RELAY_ON ? "on" : "low");
   if (light_state != new_state) {
     light_state = new_state;
-    digitalWrite(LightRelay_2, new_state);
+    digitalWrite(PIN_LIGHT_RELAY_2, new_state);
   }
 }
 void pump_water (int seconds) {
-  int old_light = !digitalRead(LightRelay_2);
+  int old_light = !digitalRead(PIN_LIGHT_RELAY_2);
   set_light(RELAY_OFF);
   delay_for_time(0, 0, 0, 500);
 
@@ -169,7 +177,7 @@ void feed_fish ( int amount, int seconds_delay ) {
   FishFeedersmall_stepper.setSpeed(75);
 
   Serial.println("Turning off lights");
-  digitalWrite(LightRelay_2, RELAY_OFF);
+  digitalWrite(PIN_LIGHT_RELAY_2, RELAY_OFF);
   delay(1000);
   //delay_for_time(0,0,1,0);
 
@@ -208,7 +216,7 @@ void lcd_display_message(char delim, char *message) {
     col     += 1;
     message += 1;
   }
-  while(col < 17) line_1[col++] = ' ';
+
   col = 0;
   message++;
   while(*message != '\0') {
@@ -216,9 +224,7 @@ void lcd_display_message(char delim, char *message) {
 
     col     += 1;
     message += 1;
-  }
-  while(col < 17) line_2[col++] = ' ';
-
+  }=
   /* Clear the screen so we can write cleanly */
   lcd.clear();
 
@@ -288,7 +294,7 @@ float get_temperature ( int pin ) {
   byte MSB = data[1];
   byte LSB = data[0];
   /* using two's complement */
-  float tempRead = ((MSB << 8)| LSB);
+  float tempRead = ((MSB << 8) | LSB);
   temperature = tempRead / 16;
   return temperature;
 }
@@ -299,6 +305,7 @@ char *get_spaces(int n) {
   char *s = (char*) malloc(n * sizeof(char));
   for(int i = 0; i < n; i++)
     s[i] = ' ';
+  s[n-1] = '\0';
   return s;
 }
 
@@ -332,27 +339,15 @@ void maybe_print_time( void ) {
     Serial.print(get_second( current_time )); Serial.print('.');
     Serial.println(get_millisecond(current_time));
 
-    char *air_temp = get_spaces(32);
-    air_temp[0] = 'A'; 
-    air_temp[1] = 'i'; 
-    air_temp[2] = 'r'; 
-    air_temp[3] = ':'; 
-    air_temp[4] = ' '; 
-    char *water_temp = get_spaces(32);
-    water_temp[0] = 'W';
-    water_temp[1] = 'a';
-    water_temp[2] = 't';
-    water_temp[3] = 'e';
-    water_temp[4] = 'r';
-    water_temp[5] = ':';
-    water_temp[6] = ' ';
+
+    char *air_temp   = "Air:           ";
+    char *water_temp = "Water:         ";
     fmtDouble(get_temperature(PIN_AIR), 2, air_temp+5);
     fmtDouble(get_temperature(PIN_WATER), 2, water_temp+7);
     lcd_display_message(':', air_temp);
     delay_for_time(0,0,2,0);
     lcd_display_message(':', water_temp);
     delay_for_time(0,0,2,0);
-    free(air_temp); free(water_temp);
   }
 }
 
