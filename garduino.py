@@ -1,6 +1,12 @@
 #!/usr/bin/env python
 
-import os
+import os, serial, sys
+
+try:
+    arduino = serial.Serial('/dev/ttyACM0', 9600)
+except:
+    print 'Did you plug in the Arduino?'
+    sys.exit()
 
 def increment_index(directory):
     if not os.path.exists(directory):
@@ -40,29 +46,21 @@ def read_stats_from_arduino():
     if __name__ == '__main__':
         print 'Watchdog barking!'
 
-    import serial
-
-    data = 'null'
-    while data == 'null':
+    air_read = water_read = None
+    while air_read is None or water_read is None:
         try:
-            arduino = serial.Serial('/dev/ttyACM0', 9600)
             temp = arduino.readline()
-            if temp[0] is '!':
-                data = temp
+            if 'Water:' in temp:
+                water_read = temp[temp.rfind(':') + 1:]
+            if 'Air:' in temp:
+                air_read = temp[temp.rfind(':') + 1:]
         except:
             print 'nothing new'
-        finally:
-            try:
-                arduino.close()
-            except:
-                print 'Did you plug in the Arduino?'
-                data = '!50 60'
 
-    print data
-    parts = data[1:].split()
+    print air_read, water_read
 
-    return {'air temp'    : int(parts[0]),
-            'water temp'  : int(parts[1])}
+    return {'air temp'    : float(air_read),
+            'water temp'  : float(water_read)}
 
 def take_picture(directory):
     '''Take a picture from the camera and return a path to the filename'''
@@ -81,7 +79,8 @@ def post_stats_to_twitter(image_directory):
     image_path = take_picture(image_directory)
     if __name__ == '__main__':
         print 'Posting to Twitter...',
-    os.system('t update "%s" -f %s' % (stats_string, image_path))
+    cmd = 't update "%s" -f %s > /home/pi/t_output 2> /home/pi/t_error &' % (stats_string, image_path)
+    os.system(cmd)
     
 if __name__ == '__main__':
     import time
@@ -90,8 +89,8 @@ if __name__ == '__main__':
     image_dir='/home/pi/images'
     print 'Done!'
     print 'Watchdog staring...'
-#    while True:
-    post_stats_to_twitter(image_dir)
-    print 'Watchdog is proud!'
-    time.sleep(5) # sleep five seconds
+    while True:
+        post_stats_to_twitter(image_dir)
+        print 'Watchdog is proud!'
+        time.sleep(30) # sleep five minutes
     print 'Watchdog sleeping.  Program exit'
